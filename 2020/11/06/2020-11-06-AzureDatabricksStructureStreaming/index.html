@@ -6,18 +6,20 @@
   
   <title>Azure Databricks 系列 Blog（二）之流计算 Structure Streaming | 茶包哥的迷你仓</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解。本文乘胜追击，设计一个实时告警系统，针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆。如果采样发现一次性购物超过 10 瓶就进行实时告警，毕竟需要防止下一个 Walter·White 出现。 code">
-<meta name="keywords" content="Microsoft Azure,Bigdata,Linux,Databricks">
+  <meta name="description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解，那乘胜追击，本文介绍一下 Azure Databricks 的流计算架构。基于的场景是设计一个实时告警系统：”针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆,如果采样发现一次性购物超过 10 瓶就进行实时告警”，毕竟需要防止下一个沃尔特·怀特出现。需要用到的服务全部部署在中国区">
+<meta name="keywords" content="Linux,Microsoft Azure,Bigdata,Databricks">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">
 <meta property="og:url" content="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/index.html">
 <meta property="og:site_name" content="茶包哥的迷你仓">
-<meta property="og:description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解。本文乘胜追击，设计一个实时告警系统，针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆。如果采样发现一次性购物超过 10 瓶就进行实时告警，毕竟需要防止下一个 Walter·White 出现。 code">
+<meta property="og:description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解，那乘胜追击，本文介绍一下 Azure Databricks 的流计算架构。基于的场景是设计一个实时告警系统：”针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆,如果采样发现一次性购物超过 10 瓶就进行实时告警”，毕竟需要防止下一个沃尔特·怀特出现。需要用到的服务全部部署在中国区">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2020-11-07T01:48:46.352Z">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Arch.png">
+<meta property="og:updated_time" content="2020-11-09T06:57:08.332Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">
-<meta name="twitter:description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解。本文乘胜追击，设计一个实时告警系统，针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆。如果采样发现一次性购物超过 10 瓶就进行实时告警，毕竟需要防止下一个 Walter·White 出现。 code">
+<meta name="twitter:description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解，那乘胜追击，本文介绍一下 Azure Databricks 的流计算架构。基于的场景是设计一个实时告警系统：”针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆,如果采样发现一次性购物超过 10 瓶就进行实时告警”，毕竟需要防止下一个沃尔特·怀特出现。需要用到的服务全部部署在中国区">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Arch.png">
   
     <link rel="alternative" href="/atom.xml" title="茶包哥的迷你仓" type="application/atom+xml">
   
@@ -99,14 +101,18 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>经过<a href="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/">开箱</a>介绍后，想必都对 Azure Databricks 有了大致的了解。本文乘胜追击，设计一个实时告警系统，针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆。如果采样发现一次性购物超过 10 瓶就进行实时告警，毕竟需要防止下一个 Walter·White 出现。</p>
-<p><a href="https://github.com/TheoDoreW/wxsblog.github.io/blob/master/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/1.txt" target="_blank" rel="noopener">code</a></p>
+        <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>经过<a href="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/">开箱</a>介绍后，想必都对 Azure Databricks 有了大致的了解，那乘胜追击，本文介绍一下 Azure Databricks 的流计算架构。基于的场景是设计一个实时告警系统：”针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆,如果采样发现一次性购物超过 10 瓶就进行实时告警”，毕竟需要防止下一个沃尔特·怀特出现。需要用到的服务全部部署在中国区 Azure 上，后文对具体每项服务功能不多做介绍，烦请读者到<a href="https://www.azure.cn/" target="_blank" rel="noopener">官网</a>自行搜索查询。</p>
+<h2 id="2-流计算架构说明"><a href="#2-流计算架构说明" class="headerlink" title="2. 流计算架构说明"></a>2. 流计算架构说明</h2><p>依据本文模拟的场景，设计的云上架构如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Arch.png" "height:750px"="" width="750px" div="" align="center/"></p>
+<p>用到的相关服务组件功能做如下说明：<br><strong>Azure Function：</strong>Severless 架构数据源，通过 Python 代码模拟客户购买行为，生成生产者数据通过 SDK 发送数据到 Azure Eventhub。<br><strong>Azure Eventhub：</strong>消息队列，做上下游生产者消费者服务的解耦，Entity ingestion 接收 Function 发送的数据，Entity alerting 接收经过 Databricks 实时计算后的数据。<br><strong>Azure Databricks：</strong>订阅 Eventhub Entity ingestion 作为数据源，通过 Structure Streaming 对数据进行实时处理后发送 Entity alerting。<br><strong>Azure LogicApp：</strong>订阅 Eventhub Entity alerting 并做邮件实时告警。</p>
+<p><strong>整个数据流：Sender发送数据 &rarr; Eventhub Entity ingestion &rarr; Databricks Structured Streaming &rarr; Eventhub Entity alerting &rarr; logic app</strong></p>
+<h2 id="3-Azure-Databrick-Structure-Streaming-实现"><a href="#3-Azure-Databrick-Structure-Streaming-实现" class="headerlink" title="3. Azure Databrick Structure Streaming 实现"></a>3. Azure Databrick Structure Streaming 实现</h2><p><a href="https://github.com/TheoDoreW/wxsblog.github.io/blob/master/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/1.txt" target="_blank" rel="noopener">code</a></p>
 
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckh7u8me2000es32bm1xeyt0f" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckhehfelx000abn2bst9t0lts" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
