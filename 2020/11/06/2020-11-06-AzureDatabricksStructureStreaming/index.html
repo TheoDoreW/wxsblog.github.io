@@ -7,7 +7,7 @@
   <title>Azure Databricks 系列 Blog（二）之流计算 Structure Streaming | 茶包哥的迷你仓</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解，那乘胜追击，本文介绍一下 Azure Databricks 的流计算架构。基于的场景是设计一个实时告警系统：“针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆，如果采样发现一次性购物超过 10 瓶就进行实时告警”，毕竟需要防止下一个沃尔特·怀特出现。需要用到的服务全部部署在中国区">
-<meta name="keywords" content="Microsoft Azure,Bigdata,Linux,Databricks">
+<meta name="keywords" content="Linux,Microsoft Azure,Bigdata,Databricks">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">
 <meta property="og:url" content="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/index.html">
@@ -15,8 +15,8 @@
 <meta property="og:description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解，那乘胜追击，本文介绍一下 Azure Databricks 的流计算架构。基于的场景是设计一个实时告警系统：“针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆，如果采样发现一次性购物超过 10 瓶就进行实时告警”，毕竟需要防止下一个沃尔特·怀特出现。需要用到的服务全部部署在中国区">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Arch.png">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Resources.jpg">
-<meta property="og:updated_time" content="2020-11-12T07:44:23.113Z">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Resources.png">
+<meta property="og:updated_time" content="2020-11-12T07:57:05.782Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">
 <meta name="twitter:description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解，那乘胜追击，本文介绍一下 Azure Databricks 的流计算架构。基于的场景是设计一个实时告警系统：“针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆，如果采样发现一次性购物超过 10 瓶就进行实时告警”，毕竟需要防止下一个沃尔特·怀特出现。需要用到的服务全部部署在中国区">
@@ -112,13 +112,13 @@
 
 <h2 id="3-Azure-Databrick-Structure-Streaming-实现"><a href="#3-Azure-Databrick-Structure-Streaming-实现" class="headerlink" title="3. Azure Databrick Structure Streaming 实现"></a>3. Azure Databrick Structure Streaming 实现</h2><p>Azure Function 直接通过 VSCode Azure Function Extension 发布，其余的 Azure Databricks、Eventhub、Logicapp 等资源都通过 Terraform 自动化部署。</p>
 <h3 id="3-1-Terraform-自动化部署"><a href="#3-1-Terraform-自动化部署" class="headerlink" title="3.1 Terraform 自动化部署"></a>3.1 Terraform 自动化部署</h3><p>通过 Terraform 部署的服务组件包括 Azure Databricks、Eventhub、Logicapp，具体的 tf 文件和变量见<a href="https://github.com/TheoDoreW/wxsblog.github.io/tree/master/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/Terraform" target="_blank" rel="noopener">这里</a>，每一项服务 Terraform Azure Provider 都有 Resource 支持，具体可以参考<a href="https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs" target="_blank" rel="noopener">官方文档</a>。部署完成之后的资源清单如下图所示，所有资源都部署在中国北二区域。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Resources.jpg" "height:800px"="" width="800px" div="" align="center/"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Resources.png" "height:800px"="" width="800px" div="" align="center/"></p>
 <h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2>
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckhej3jxk0012pl2bd616p6s0" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckhejmxfb002xrh2bp1jx22vw" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
