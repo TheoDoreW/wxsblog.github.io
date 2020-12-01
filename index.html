@@ -110,20 +110,22 @@
 <h2 id="3-Azure-Databrick-Structure-Streaming-实现"><a href="#3-Azure-Databrick-Structure-Streaming-实现" class="headerlink" title="3. Azure Databrick Structure Streaming 实现"></a>3. Azure Databrick Structure Streaming 实现</h2><h3 id="3-1-Terraform-自动化部署"><a href="#3-1-Terraform-自动化部署" class="headerlink" title="3.1 Terraform 自动化部署"></a>3.1 Terraform 自动化部署</h3><p>通过 Terraform 部署的服务组件包括 Azure Virtual Machine、 Azure Databricks、Eventhub、Logic App，具体的 tf 文件和变量见<a href="https://github.com/TheoDoreW/wxsblog.github.io/tree/master/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/Terraform" target="_blank" rel="noopener">这里</a>，每一项服务 Terraform Azure Provider 都有 Resource 支持，具体可以参考<a href="https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs" target="_blank" rel="noopener">官方文档</a>。部署完成之后的资源清单如下图所示，所有资源都部署在中国北二区域。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Resources.png" "height:900px"="" width="900px" div="" align="center/"></p>
 <h3 id="3-2-Producer-代码发布"><a href="#3-2-Producer-代码发布" class="headerlink" title="3.2 Producer 代码发布"></a>3.2 Producer 代码发布</h3><p>模拟的生产者代码通过 VM 发布，通过调用 Azure Eventhub 的 SDK 将 Messages 进行写入，具体代码见<a href="https://github.com/TheoDoreW/wxsblog.github.io/blob/master/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/PythonProducer/Producer.py" target="_blank" rel="noopener">这里</a>，几个重要配置简单说明下：<br><strong>azure.eventhub：</strong>Azure Eventhub SDK 包，需要通过 pip3 install azure.eventhub 来指定安装。<br><strong>create_batch()：</strong>通过该方法 batch 发送数据，本次示例以 1 条消息为 1 个 batch 发送到 Eventhub Entity ingestion。<br><strong>CONNECTION_STR：</strong>Azure Eventhub Endpoint，该连接字符串可以在 Portal 上 Shared access policies 的 Connection string–primary key 查看。<br><strong>EVENTHUB_NAME：</strong>写入的 Eventhub Entity Name。</p>
-<h3 id="3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成"><a href="#3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成" class="headerlink" title="3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成"></a>3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成</h3><p>Azure Databricks 的创建过程是先需要在 Azure 上创建一个 Databricks 实体，然后在此基础上在实体内部创建 Workspace 以及 Cluster，提交 Job 等等，针对 Databricks 资源，都会由唯一的 ID 和 Endpoint 与之对应，以便能够进行 Restful API 调用，集群通过 Databricks Portal 创建即可，本实例创建 1 Driver 2 Worker 共计3节点，Databricks 版本为 6.4 (includes Apache Spark 2.4.5, Scala 2.11)。如果需要做机器学习相关的计算，可以启用集成 GPU/ML 框架的版本，详细说明见<a href="https://docs.microsoft.com/zh-cn/azure/databricks/release-notes/runtime/releases" target="_blank" rel="noopener">官方文档</a>，不做赘述。</p>
+<h3 id="3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成"><a href="#3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成" class="headerlink" title="3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成"></a>3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成</h3><p>Azure Databricks 的创建过程是先需要在 Azure 上创建一个 Databricks 实体，然后在此基础上在实体内部创建 Workspace 以及 Cluster，提交 Job 等等，针对 Databricks 资源，都会由唯一的 ID 和 Endpoint 与之对应，以便能够进行 Restful API 调用，集群通过 Databricks Portal 创建即可。本示例创建 1 Driver 2 Worker 共计 3 个节点，Databricks 版本为 6.4 (includes Apache Spark 2.4.5, Scala 2.11)。如果需要做机器学习相关的计算，可以启用集成 GPU/ML 框架的版本，详细说明见<a href="https://docs.microsoft.com/zh-cn/azure/databricks/release-notes/runtime/releases" target="_blank" rel="noopener">官方文档</a>，不做赘述。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Clusters.jpg" "height:900px"="" width="900px" div="" align="center/"></p>
-<p>集群状态变为 Running 后，集群就已经 Ready 可以使用了，下面导入 Python Notebook 来运行 Structure Streaming 任务。Notebook 可以直接在 Portal 里新建写入，也可以在 VS Code 等 IDE 编写完之后发布，本文采用第二种模式，原因是 IDE 丰富的插件可以提高效率。具体的 Notebook 本文不做展示，放在<a href="">这里</a>，有需要的读者可以自行查看。通过 import 导入后，附上导入后的截图并做几点说明：</p>
+<p>集群状态变为 Running 后，集群就已经 Ready 可以使用了，不过再导入 Python Notebook 之前，需要通过 Maven Central 安装 com.microsoft.azure:azure-eventhubs-spark 库文件以便安装 Spark 连接 Azure Eventhub Connector，需要注意库文件的版本要匹配。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Eventhub-Maven-Central-Installation.png" "height:900px"="" width="900px" div="" align="center/"></p>
+<p>Notebook 可以直接在 Portal 里新建写入，也可以在 VS Code 等 IDE 编写完之后发布，本文采用第二种模式，原因是 IDE 丰富的插件可以提高效率。具体的 Notebook 本文不做展示，放在<a href="">这里</a>，有需要的读者可以自行查看。通过 import 导入后，附上导入后的截图并做几点说明：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Streaming-Notebook.jpg" "height:900px"="" width="900px" div="" align="center/"></p>
 <p>整个 Notebook 分为三个 stage：<br><strong>第一阶段：</strong>从 Eventhub Entity ingestion 读取 Producer 写入的数据，通过 Streaming DataFrames 的 spark.readStream() 创建。<br><strong>第二阶段：</strong>通过 DataFrame 丰富的函数做字段筛选，筛选出来我们需要的字段。<br><strong>第二阶段：</strong>回写 Eventhub Entity alerting，通过 Streaming DataFrames 的 spark.writeStream() 流式写入，注意利用 checkpoint 方便任务终止再运行。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Streaming-Status.jpg" "height:900px"="" width="900px" div="" align="center/"></p>
-<p>当 Producer 运行起来的时候，Eventhub 就会不断有数据写入，所以能看到 Spark 的 Input Records 的图像。对于每一个 Job，都能看到对于该任务分配的资源和 Spark 参数配置项。另外需要注意，在运行该 Notebook 之前，需要通过 Maven Central 安装 com.microsoft.azure:azure-eventhubs-spark 库文件，以便可以连接 Eventhub 做读写。</p>
-<h3 id="3-4-Azure-Function-VSCode-代码发布"><a href="#3-4-Azure-Function-VSCode-代码发布" class="headerlink" title="3.4 Azure Function VSCode 代码发布"></a>3.4 Azure Function VSCode 代码发布</h3><h3 id="3-5-Logic-APP-配置邮件告警"><a href="#3-5-Logic-APP-配置邮件告警" class="headerlink" title="3.5 Logic APP 配置邮件告警"></a>3.5 Logic APP 配置邮件告警</h3><p>&nbsp;</p>
+<p>当 Producer 运行起来的时候，Eventhub 就会不断有数据写入，所以能看到 Spark 的 Input Records 的图像。对于每一个 Job，都能看到对于该任务分配的资源和 Spark 参数配置项。</p>
+<h3 id="3-4-Logic-APP-配置邮件告警"><a href="#3-4-Logic-APP-配置邮件告警" class="headerlink" title="3.4 Logic APP 配置邮件告警"></a>3.4 Logic APP 配置邮件告警</h3><p>&nbsp;</p>
 <h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2>
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="cki5qjc55001umk2b41wrnc11" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="cki5qulni0016nm2busd371bw" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
@@ -194,7 +196,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="cki5qjc5f0020mk2b1fots77b" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="cki5quln90014nm2b6yxdwhfr" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
       
 
       
@@ -263,7 +265,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="cki5qjc5c001zmk2baeuwb7x8" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="cki5quln70010nm2bwp2x8bko" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
       
 
       
@@ -347,7 +349,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="cki5qjc5a001xmk2bt7y7fqff" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="cki5quln5000znm2bztjv5pbh" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
       
 
       
@@ -428,7 +430,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/" data-id="cki5qjc58001vmk2bsxmloaoy" class="article-share-link" data-share="baidu" data-title="集成 Microsoft Azure Monitor Restful API 来监控 MongoDB">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/" data-id="cki5quln3000xnm2bbq8yv96r" class="article-share-link" data-share="baidu" data-title="集成 Microsoft Azure Monitor Restful API 来监控 MongoDB">Share</a>
       
 
       
@@ -512,7 +514,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/12/09/2019-12-09-AzureDMS/" data-id="cki5qjc480005mk2bshiqxyky" class="article-share-link" data-share="baidu" data-title="Azure Database Migration Service — 数据库迁移到 Microsoft Azure 平台的好帮手">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/12/09/2019-12-09-AzureDMS/" data-id="cki5quln0000vnm2bnxxft6br" class="article-share-link" data-share="baidu" data-title="Azure Database Migration Service — 数据库迁移到 Microsoft Azure 平台的好帮手">Share</a>
       
 
       
@@ -607,7 +609,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/11/17/2019-11-18-FlinkonAKS/" data-id="cki5qjc3m0000mk2bb9n0j656" class="article-share-link" data-share="baidu" data-title="新一代大数据计算框架 Flink 与 Microsoft Azure Kubernetes 集成来做流批计算">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/11/17/2019-11-18-FlinkonAKS/" data-id="cki5qulmy000unm2bm55pt0dk" class="article-share-link" data-share="baidu" data-title="新一代大数据计算框架 Flink 与 Microsoft Azure Kubernetes 集成来做流批计算">Share</a>
       
 
       
@@ -695,7 +697,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/10/13/2019-10-13-SparkonAKS/" data-id="cki5qjc470004mk2b6oc7as5t" class="article-share-link" data-share="baidu" data-title="强强联合! 利用 Microsoft Azure AKS 集群集成 Apache Spark 来做大数据计算">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/10/13/2019-10-13-SparkonAKS/" data-id="cki5qulm50001nm2bgbzwryes" class="article-share-link" data-share="baidu" data-title="强强联合! 利用 Microsoft Azure AKS 集群集成 Apache Spark 来做大数据计算">Share</a>
       
 
       
@@ -760,7 +762,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/01/18/2019-01-18-WSL/" data-id="cki5qjc400001mk2bf2htw399" class="article-share-link" data-share="baidu" data-title="Win10强大的WSL(Windows Subsystem for Linux)">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/01/18/2019-01-18-WSL/" data-id="cki5qullz0000nm2b0daz4a0f" class="article-share-link" data-share="baidu" data-title="Win10强大的WSL(Windows Subsystem for Linux)">Share</a>
       
 
       
