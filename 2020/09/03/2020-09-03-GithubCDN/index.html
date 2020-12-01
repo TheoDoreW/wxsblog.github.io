@@ -19,7 +19,7 @@
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-Token-Access.jpg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/PicGo-Config.jpg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-PicGo.jpg">
-<meta property="og:updated_time" content="2020-09-03T14:57:34.264Z">
+<meta property="og:updated_time" content="2020-11-12T08:27:55.655Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 jsDelivr CDN 加速 Github Pages">
 <meta name="twitter:description" content="1. 前言Github Pages 是个非常好的用来托管静态网页的功能，所以很多同学用来把自己的 Blog 放在上面去做托管，这么酷的功能既能让你心满意足地写博客，又可以同时找到 Coding 感觉，配合着静态站点生成器比如说 Jekyll、Hexo，自己还不需要做维护，何乐而不为~ 不过这里面有个不太方面国内使用的问题，Github 服务器都在海外，在国内访问 Github Pages Blog">
@@ -106,9 +106,11 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>Github Pages 是个非常好的用来托管静态网页的功能，所以很多同学用来把自己的 Blog 放在上面去做托管，这么酷的功能既能让你心满意足地写博客，又可以同时找到 Coding 感觉，配合着静态站点生成器比如说 <a href="https://jekyllrb.com/" target="_blank" rel="noopener">Jekyll</a>、<a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>，自己还不需要做维护，何乐而不为~ 不过这里面有个不太方面国内使用的问题，Github 服务器都在海外，在国内访问 Github Pages Blog 会出现访问比较慢的问题，尤其是 Blog 中需要加载的图片，稍微大一点的需要加载很长时间，但是 Github 在微软收购之后依然良心， 此时本文的主角登场，<a href="https://www.jsdelivr.com/" target="_blank" rel="noopener">jsDelivr CDN</a>。</p>
+<p>&nbsp;</p>
 <h2 id="2-jsDelivr-CDN-介绍"><a href="#2-jsDelivr-CDN-介绍" class="headerlink" title="2. jsDelivr CDN 介绍"></a>2. jsDelivr CDN 介绍</h2><p>jsDelivr 是国外的一家优秀的公共 CDN 服务提供商，也是首个「打通中国大陆（网宿公司运营）与海外的免费 CDN 服务」，同时也为 npm、GitHub、WordPress 插件和具有特殊要求的其他几个项目的自定义终结点提供镜像。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/CDN-Introduction.jpg" "height:800px"="" width="800px" div="" align="center/"></p>
 <p>能够看出来，POP 点也是分布全球比较均匀的，最重要的是标红的那句，能够在中国使用！是不是很令人激动~ 本文就给大家演示下如何用 jsDelivr CDN 加速 Github Pages 的图床，这样图片就可以秒加载啦！</p>
+<p>&nbsp;</p>
 <h2 id="3-使用-jsDelivr-CDN-加速-Github-Pages-图床"><a href="#3-使用-jsDelivr-CDN-加速-Github-Pages-图床" class="headerlink" title="3. 使用 jsDelivr CDN 加速 Github Pages 图床"></a>3. 使用 jsDelivr CDN 加速 Github Pages 图床</h2><h3 id="3-1-Github-配置"><a href="#3-1-Github-配置" class="headerlink" title="3.1 Github 配置"></a>3.1 Github 配置</h3><p>首先需要创建一个 Github Repo，然后生成一个 Token，使得使用这个 key 可以有权限控制该仓库。如下面两张图所示：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-Generate-Token.jpg" "height:800px"="" width="800px" div="" align="center/"></p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-Token-Access.jpg" "height:800px"="" width="800px" div="" align="center/"></p>
@@ -119,13 +121,14 @@
 <p>配置好之后，就可以切换到 “图片上传” 选择 “图片上传 - GitHub图床” 后就可以上传图片了，支持拖拽、点击、剪贴板上传，上传后，图片链接直接复制的你的剪贴板中。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-PicGo.jpg" "height:800px"="" width="800px" div="" align="center/"></p>
 <p>能够看出来，Github 可以识别出来是通过 PicGo 上传的。</p>
+<p>&nbsp;</p>
 <h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>至此，Github Pages 使用 jsDelivr CDN 加速图片的教程就完成了。其实可以做的更细致，比如说 js 静态文件也通过 CDN 做加速，都可以配置的，剩余的工作交由感兴趣的同学们自己来完成啦。</p>
 
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="ckhejmxew002urh2blstbytzc" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="cki5jjjlx001hgc2b5qzf40md" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
       
 
       

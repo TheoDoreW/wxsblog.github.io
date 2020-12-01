@@ -96,39 +96,6 @@ resource "azurerm_network_security_group" "opnsg" {
         environment = "Azure Terraform Automation"
     }
 }
-resource "azurerm_network_security_group" "dbnsg" {
-    name                = "db-nsg"
-    location            = "${var.location}"
-    resource_group_name = "${azurerm_resource_group.myterraformgroup.name}"
-    
-    security_rule {
-        name                       = "SSH"
-        priority                   = 1001
-        direction                  = "Inbound"
-        access                     = "Allow"
-        protocol                   = "Tcp"
-        source_port_range          = "*"
-        destination_port_range     = "22"
-        source_address_prefix      = "*"
-        destination_address_prefix = "*"
-    }
-    
-        security_rule {
-        name                       = "RDP"
-        priority                   = 1002
-        direction                  = "Inbound"
-        access                     = "Allow"
-        protocol                   = "Tcp"
-        source_port_range          = "*"
-        destination_port_range     = "3389"
-        source_address_prefix      = "*"
-        destination_address_prefix = "*"
-    }
-
-    tags = {
-        environment = "Azure Terraform Automation"
-    }
-}
 
 # Create subnet
 resource "azurerm_subnet" "publicsubnet" {
@@ -150,38 +117,6 @@ resource "azurerm_subnet" "opsubnet" {
 resource "azurerm_subnet_network_security_group_association" "opsubnet_network_security_group_association" {
   subnet_id                 = "${azurerm_subnet.opsubnet.id}"
   network_security_group_id = "${azurerm_network_security_group.opnsg.id}"
-}
-resource "azurerm_subnet" "dbpublicsubnet" {
-    name                 = "dbpublicsn01"
-    resource_group_name  = "${azurerm_resource_group.myterraformgroup.name}"
-    virtual_network_name = "${azurerm_virtual_network.myterraformnetwork.name}"
-    address_prefix       = "10.21.4.0/23"
-    delegation {
-        name = "delegation"
-        service_delegation {
-            name    = "Microsoft.Databricks/workspaces"
-        }
-    }
-}
-resource "azurerm_subnet_network_security_group_association" "dbpublicsubnet_network_security_group_association" {
-  subnet_id                 = "${azurerm_subnet.dbpublicsubnet.id}"
-  network_security_group_id = "${azurerm_network_security_group.dbnsg.id}"
-}
-resource "azurerm_subnet" "dbopsubnet" {
-    name                 = "dbopsn01"
-    resource_group_name  = "${azurerm_resource_group.myterraformgroup.name}"
-    virtual_network_name = "${azurerm_virtual_network.myterraformnetwork.name}"
-    address_prefix       = "10.21.6.0/23"
-    delegation {
-        name = "delegation"
-        service_delegation {
-            name    = "Microsoft.Databricks/workspaces"
-        }
-    }
-}
-resource "azurerm_subnet_network_security_group_association" "dbopsubnet_network_security_group_association" {
-  subnet_id                 = "${azurerm_subnet.dbopsubnet.id}"
-  network_security_group_id = "${azurerm_network_security_group.dbnsg.id}"
 }
 
 # Create Public IP
@@ -245,7 +180,7 @@ resource "azurerm_virtual_machine" "centos01" {
     }
 
     storage_image_reference {
-        id = "/subscriptions/15e95d2e-6cd0-4d1c-96da-b8e055a62ee8/resourceGroups/imagerg/providers/Microsoft.Compute/images/centos77image01"
+        id = "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/imagerg/providers/Microsoft.Compute/images/centos77image01"
     }
 
     os_profile {
@@ -283,7 +218,6 @@ resource "azurerm_eventhub_namespace" "eventhub01" {
     environment = "Azure Terraform Automation"
   }
 }
-
 resource "azurerm_eventhub" "ingestion" {
   name                = "ingestion"
   resource_group_name = "${azurerm_resource_group.myterraformgroup.name}"
@@ -304,23 +238,12 @@ resource "azurerm_databricks_workspace" "databricksws01" {
   resource_group_name = "${azurerm_resource_group.myterraformgroup.name}"
   location            = "${var.location}"
   sku                 = "standard"
-
-  custom_parameters {
-    virtual_network_id  = "${azurerm_virtual_network.myterraformnetwork.id}"
-    no_public_ip        = true
-    public_subnet_name  = "dbpublicsn01"
-    private_subnet_name = "dbopsn01"
-  }
-
-  tags = {
-    Environment = "Azure Terraform Automation"
-  }
 }
 
-resource "azurerm_logic_app_workflow" "logicapp01" {
-  name                = "${azurerm_resource_group.myterraformgroup.name}la01"
+resource "azurerm_logic_app_workflow" "lga01" {
+  name                = "${var.lab_namespace}lga01"
   resource_group_name = "${azurerm_resource_group.myterraformgroup.name}"
-  location            = "${azurerm_resource_group.myterraformgroup.location}"
+  location            = "${var.location}"
 
   tags = {
     Environment = "Azure Terraform Automation"
