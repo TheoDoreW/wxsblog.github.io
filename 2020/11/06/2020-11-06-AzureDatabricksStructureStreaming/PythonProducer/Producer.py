@@ -24,7 +24,7 @@ def run():
     event_data_batch.add(EventData(s))
     producer.send_batch(event_data_batch)
 if __name__=="__main__":
-    CONNECTION_STR = "Endpoint=sb://streamingdemoehns01.servicebus.chinacloudapi.cn/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=6ObLivEO3O51wB99d7bsCNnaxonwYDgWfBjqIQk/YVU="
+    CONNECTION_STR = "Endpoint=sb://streamingdemoehns01.servicebus.chinacloudapi.cn/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     EVENTHUB_NAME = "ingestion"
     producer = EventHubProducerClient.from_connection_string(conn_str=CONNECTION_STR, eventhub_name=EVENTHUB_NAME)
     # -------------------------------------------------------
