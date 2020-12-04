@@ -7,7 +7,7 @@
   <title>Azure Databricks 系列 Blog（二）之流计算 Structure Streaming | 茶包哥的迷你仓</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解，那乘胜追击，本文介绍一下 Azure Databricks 的流计算架构。基于的场景是设计一个实时告警系统：“针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆，如果采样发现一次性购物超过 10 瓶就进行实时告警”，毕竟需要防止下一个沃尔特·怀特出现。需要用到的服务全部部署在中国区">
-<meta name="keywords" content="Linux,Microsoft Azure,Bigdata,Databricks">
+<meta name="keywords" content="Microsoft Azure,Bigdata,Linux,Databricks">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">
 <meta property="og:url" content="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/index.html">
@@ -20,7 +20,9 @@
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Eventhub-Maven-Central-Installation.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Streaming-Notebook.jpg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Streaming-Status.jpg">
-<meta property="og:updated_time" content="2020-12-01T08:57:55.137Z">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/LogicApp-Alerting-Designer.jpg">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/LogicApp-Email-Alert.jpg">
+<meta property="og:updated_time" content="2020-12-04T09:29:29.336Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">
 <meta name="twitter:description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解，那乘胜追击，本文介绍一下 Azure Databricks 的流计算架构。基于的场景是设计一个实时告警系统：“针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆，如果采样发现一次性购物超过 10 瓶就进行实时告警”，毕竟需要防止下一个沃尔特·怀特出现。需要用到的服务全部部署在中国区">
@@ -110,7 +112,7 @@
 <p>&nbsp;</p>
 <h2 id="2-流计算架构说明"><a href="#2-流计算架构说明" class="headerlink" title="2. 流计算架构说明"></a>2. 流计算架构说明</h2><p>依据本文模拟的场景，设计的云上架构如下图所示：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Arch.png" "height:750px"="" width="750px" div="" align="center/"></p>
-<p>用到的相关服务组件功能做如下说明：<br><strong>Azure VM：</strong>数据源，扮演 Producer 生产者，通过 Python 代码模拟客户购买行为，生成示例数据通过 SDK 发送数据到 Azure Eventhub。<br><strong>Azure Eventhub：</strong>消息队列，做上下游生产者消费者服务的解耦，Entity ingestion 接收 Function 发送的数据，Entity alerting 接收经过 Databricks 实时计算后的数据。<br><strong>Azure Databricks：</strong>订阅 Eventhub Entity ingestion 作为数据源，通过 Structure Streaming 对数据进行实时处理后发送 Entity alerting。<br><strong>Azure LogicApp：</strong>订阅 Eventhub Entity alerting 并做邮件实时告警。</p>
+<p>用到的相关服务组件功能做如下说明：<br><strong>Azure VM：</strong>数据源，扮演 Producer 生产者，通过 Python 代码模拟客户购买行为，生成示例数据通过 SDK 发送数据到 Azure Eventhub。<br><strong>Azure Eventhub：</strong>消息队列，做上下游生产者消费者服务的解耦，Entity ingestion 接收 Producer 发送的数据，Entity alerting 接收经过 Databricks 实时计算后的数据。<br><strong>Azure Databricks：</strong>订阅 Eventhub Entity ingestion 作为数据源，通过 Structure Streaming 对数据进行实时处理后发送 Entity alerting。<br><strong>Azure LogicApp：</strong>订阅 Eventhub Entity alerting 并做邮件实时告警。</p>
 <font color="blue"><strong>整个数据流：Producer 生产者发送数据 &rarr; Eventhub Entity ingestion &rarr; Databricks Structured Streaming &rarr; Eventhub Entity alerting &rarr; Logic App</strong></font>
 
 <p>&nbsp;</p>
@@ -126,13 +128,18 @@
 <p>整个 Notebook 分为三个 stage：<br><strong>第一阶段：</strong>从 Eventhub Entity ingestion 读取 Producer 写入的数据，通过 Streaming DataFrames 的 spark.readStream() 创建。<br><strong>第二阶段：</strong>通过 DataFrame 丰富的函数做字段筛选，筛选出来我们需要的字段。<br><strong>第二阶段：</strong>回写 Eventhub Entity alerting，通过 Streaming DataFrames 的 spark.writeStream() 流式写入，注意利用 checkpoint 方便任务终止再运行。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Streaming-Status.jpg" "height:900px"="" width="900px" div="" align="center/"></p>
 <p>当 Producer 运行起来的时候，Eventhub 就会不断有数据写入，所以能看到 Spark 的 Input Records 的图像。对于每一个 Job，都能看到对于该任务分配的资源和 Spark 参数配置项。</p>
-<h3 id="3-4-Logic-APP-配置邮件告警"><a href="#3-4-Logic-APP-配置邮件告警" class="headerlink" title="3.4 Logic APP 配置邮件告警"></a>3.4 Logic APP 配置邮件告警</h3><p>&nbsp;</p>
-<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2>
+<h3 id="3-4-Logic-APP-配置邮件告警"><a href="#3-4-Logic-APP-配置邮件告警" class="headerlink" title="3.4 Logic APP 配置邮件告警"></a>3.4 Logic APP 配置邮件告警</h3><p>经过 Azure Databricks 的数据筛选后，筛选出来的 Messages 都写入了 Eventhub Entity alerting 中，此时通过 LogicApp 来定义一个自动化的 workflow 来进行邮件告警。具体创建过程选择 Blank 即可，然后自己创建 Step 即可，当然 Azure Portal 上的示例模板也可以用来参考。如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/LogicApp-Alerting-Designer.jpg" "height:900px"="" width="900px" div="" align="center/"></p>
+<p>第一步订阅 Eventhub Entity alerting，第二步集成 Outlook 邮件接口发送告警邮件。所以当目标消息被筛选出来之后，LogicApp 就按照定义的邮件内容(本文是 Messages 内容和时间戳)来发送邮件，发送邮件的截图如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/LogicApp-Email-Alert.jpg" "height:900px"="" width="900px" div="" align="center/"></p>
+<p>&nbsp;</p>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>总体上，一个通过消息队列 Azure Eventhub 以及 Databricks 做流计算处理的示例就完成了，如果消息生产者 Producer 不断产生消息，那么整个任务就会一直运行下去，当出现目标消息的时候就会不断的持续告警。在 Spark 推出 Structure Streaming 以后，也解决了 Spark Streaming microbatch 的局限性，Spark 一切未来可期！</p>
+
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="cki5r1kub000eqa2bap43r4ng" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckia2ic2w00125y2bv1e5y65t" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
