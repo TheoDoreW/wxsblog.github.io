@@ -7,7 +7,7 @@
   <title>Azure Databricks 系列 Blog（二）之流计算 Structure Streaming | 茶包哥的迷你仓</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解，那乘胜追击，本文介绍一下 Azure Databricks 的流计算架构。基于的场景是设计一个实时告警系统：“针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆，如果采样发现一次性购物超过 10 瓶就进行实时告警”，毕竟需要防止下一个沃尔特·怀特出现。需要用到的服务全部部署在中国区">
-<meta name="keywords" content="Linux,Microsoft Azure,Bigdata,Databricks">
+<meta name="keywords" content="Microsoft Azure,Linux,Bigdata,Databricks">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">
 <meta property="og:url" content="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/index.html">
@@ -22,7 +22,7 @@
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Streaming-Status.jpg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/LogicApp-Alerting-Designer.jpg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/LogicApp-Email-Alert.jpg">
-<meta property="og:updated_time" content="2020-12-04T11:15:54.752Z">
+<meta property="og:updated_time" content="2020-12-04T11:18:21.223Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">
 <meta name="twitter:description" content="1. 前言经过开箱介绍后，想必都对 Azure Databricks 有了大致的了解，那乘胜追击，本文介绍一下 Azure Databricks 的流计算架构。基于的场景是设计一个实时告警系统：“针对一家杂货店的购物者的购物异常习惯进行实时采样和告警，主要针对的产品是止咳糖浆，如果采样发现一次性购物超过 10 瓶就进行实时告警”，毕竟需要防止下一个沃尔特·怀特出现。需要用到的服务全部部署在中国区">
@@ -129,7 +129,7 @@
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Streaming-Status.jpg" "height:900px"="" width="900px" div="" align="center/"></p>
 <p>当 Producer 运行起来的时候，Eventhub 就会不断有数据写入，所以能看到 Spark 的 Input Records 的图像。对于每一个 Job，都能看到对于该任务分配的资源和 Spark 参数配置项。</p>
 <h3 id="3-4-Logic-APP-配置邮件告警"><a href="#3-4-Logic-APP-配置邮件告警" class="headerlink" title="3.4 Logic APP 配置邮件告警"></a>3.4 Logic APP 配置邮件告警</h3><p>经过 Azure Databricks 的数据筛选后，筛选出来的 Messages 都写入了 Eventhub Entity alerting 中，此时通过 LogicApp 来定义一个自动化的 workflow 来进行邮件告警。具体创建过程选择 Blank 然后自己创建 Step 即可，当然 Azure Portal 上的示例模板也可以用来参考，如下图所示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/LogicApp-Alerting-Designer.jpg" "height:900px"="" width="900px" div="" align="center/"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/LogicApp-Alerting-Designer.jpg" "height:800px"="" width="800px" div="" align="center/"></p>
 <p>第一步订阅 Eventhub Entity alerting，第二步集成 Outlook 邮件接口发送告警邮件。所以当目标消息被筛选出来之后，LogicApp 就按照定义的邮件内容(本文是 Messages 内容和时间戳)来发送邮件，发送邮件的截图如下：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/LogicApp-Email-Alert.jpg" "height:700px"="" width="700px" div="" align="center/"></p>
 <p>&nbsp;</p>
@@ -139,7 +139,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckia6amea000e822b8q7v3r5z" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckia6dvyf000e942buzqnark6" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
