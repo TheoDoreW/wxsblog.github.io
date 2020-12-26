@@ -4,18 +4,23 @@
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="utf-8">
   
-  <title>Tag: Microsoft Azure | 茶包哥的迷你仓</title>
+  <title>Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake | 茶包哥的迷你仓</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="专注于云/大数据/容器化方向">
-<meta property="og:type" content="website">
-<meta property="og:title" content="茶包哥的迷你仓">
-<meta property="og:url" content="https://theodorew.github.io/wxsblog.github.io/tags/Microsoft-Azure/index.html">
+  <meta name="description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，展示了一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文">
+<meta name="keywords" content="Microsoft Azure,Bigdata,Linux,Databricks">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">
+<meta property="og:url" content="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/index.html">
 <meta property="og:site_name" content="茶包哥的迷你仓">
-<meta property="og:description" content="专注于云/大数据/容器化方向">
+<meta property="og:description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，展示了一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-marketecture.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Gen2.png">
+<meta property="og:updated_time" content="2020-12-26T09:59:51.810Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="茶包哥的迷你仓">
-<meta name="twitter:description" content="专注于云/大数据/容器化方向">
+<meta name="twitter:title" content="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">
+<meta name="twitter:description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，展示了一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-marketecture.png">
   
     <link rel="alternative" href="/atom.xml" title="茶包哥的迷你仓" type="application/atom+xml">
   
@@ -71,201 +76,77 @@
   </div>
 </header>
     <div class="outer">
-      <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/wxsblog.github.io/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" class="archive-article-date">
-  <time datetime="2020-12-17T11:09:13.000Z" itemprop="datePublished">Dec 17</time>
+      <section id="main"><article id="post-2020-12-17-AzureDatabricksSparkSQLonDeltaLake" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" class="article-date">
+  <time datetime="2020-12-17T11:09:13.000Z" itemprop="datePublished">2020-12-17</time>
 </a>
-      
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/">Microsoft Azure</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/">Databricks</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/Bigdata/">Bigdata</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/Bigdata/Linux/">Linux</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/">Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake</a>
+    <h1 class="article-title" itemprop="name">
+      Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" class="archive-article-date">
-  <time datetime="2020-11-06T04:35:53.000Z" itemprop="datePublished">Nov 6</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/">Azure Databricks 系列 Blog（二）之流计算 Structure Streaming</a>
-    </h1>
-  
+        <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p><a href="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/">上一篇</a>介绍了 Azure Databricks 流计算框架 Structure Streaming，展示了一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文就来介绍并演示下 SparkSQL，一个可以通过 Spark 来进行 SQL 分析的可实时可离线的计算框架。本文场景基于集成 Azure Datalake Gen2 并 Enable Databricks Delta Lake 作为外部存储实现计算存储分离，通过 SparkSQL 新冠肺炎实时统计数据，资源依然沿用前面 Demo 所创建的资源组，具体如何实现，且听下文分解。</p>
+<p>&nbsp;</p>
+<h2 id="2-Delta-Lake-介绍及-Azure-Datalake-Gen2-集成"><a href="#2-Delta-Lake-介绍及-Azure-Datalake-Gen2-集成" class="headerlink" title="2. Delta Lake 介绍及 Azure Datalake Gen2 集成"></a>2. Delta Lake 介绍及 Azure Datalake Gen2 集成</h2><p>Delta Lake 是可提高数据湖可靠性的开源存储层，由 Databricks 开发并开源出来。 Delta Lake 提供 ACID 事务和可缩放的元数据处理，并可以统一流处理和批数据处理。 Delta Lake 在现有 Data Lake 的顶层运行，并且可以与 Apache Spark API 完全兼容。具体而言，Delta Lake 提供：<br><strong>Spark 上的 ACID 事务：</strong>可序列化的隔离级别可避免读者看到不一致的数据。<br><strong>可缩放的元数据处理：</strong>利用 Spark 的分布式处理能力，轻松处理包含数十亿文件的 PB 级表的所有元数据。<br><strong>流式处理和批处理统一：</strong>Delta Lake 中的表是批处理表，也是流式处理源和接收器。 流式处理数据引入、批处理历史回填、交互式查询功能都是现成的。<br><strong>架构强制：</strong>自动处理架构变体，以防在引入过程中插入错误的记录。<br><strong>按时间顺序查看：</strong>数据版本控制支持回滚、完整的历史审核线索和可重现的机器学习试验。<br><strong>更新插入和删除：</strong>支持合并、更新和删除操作，以启用复杂用例，如更改数据捕获、渐变维度 (SCD) 操作、流式处理更新插入等。<br>总的来说，Delta Lake 不仅仅在需要事务的 ACID 场景给予支持，并且针对性能也做了相当大的代码优化，本文的实现也是基于 Delta Lake，需要注意数据格式需要转换成 delta。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-marketecture.png" "height:750px"="" width="750px" div="" align="center/"></p>
+<p>正常 Azure Datalake Gen2 与 Delta Lake 的集成需要在 Spark 中增加配置项 “spark.delta.logStore.class=org.apache.spark.sql.delta.storage.AzureLogStore”, 并且集群需要在 lib 库中支持 hadoop-azure-datalake/hadoop-azure/wildfly-openssl JAR，具体过程可以见<a href="https://docs.delta.io/latest/delta-storage.html#azure-data-lake-storage-gen2" target="_blank" rel="noopener">这里</a>。所以这时候 PaaS 的优势就显示出来了，Azure Databricks 在 Cluster 创建好的同时就已经在集群上启用了该库，直接调用即可。 Azure Datalake Gen2 的创建过程本文不赘述，具体见<a href="https://docs.microsoft.com/en-us/azure/storage/blobs/create-data-lake-storage-account" target="_blank" rel="noopener">官方文档</a>。本文介绍两种常见的集成方式，如下图所示并做几点说明：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Gen2.png" "height:750px"="" width="750px" div="" align="center/"></p>
+<font color="blue"><strong>整个数据流：Producer 生产者发送数据 &rarr; Eventhub Entity ingestion &rarr; Databricks Structured Streaming &rarr; Eventhub Entity alerting &rarr; Logic App</strong></font>
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" class="archive-article-date">
-  <time datetime="2020-09-04T05:46:32.000Z" itemprop="datePublished">Sep 4</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/">Azure Databricks 系列 Blog（一）之开箱</a>
-    </h1>
-  
+<p>&nbsp;</p>
+<h2 id="3-Azure-Databrick-Structure-Streaming-实现"><a href="#3-Azure-Databrick-Structure-Streaming-实现" class="headerlink" title="3. Azure Databrick Structure Streaming 实现"></a>3. Azure Databrick Structure Streaming 实现</h2><h3 id="3-1-Terraform-自动化部署"><a href="#3-1-Terraform-自动化部署" class="headerlink" title="3.1 Terraform 自动化部署"></a>3.1 Terraform 自动化部署</h3><h3 id="3-2-Producer-代码发布"><a href="#3-2-Producer-代码发布" class="headerlink" title="3.2 Producer 代码发布"></a>3.2 Producer 代码发布</h3><h3 id="3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成"><a href="#3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成" class="headerlink" title="3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成"></a>3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成</h3><h3 id="3-4-Logic-APP-配置邮件告警"><a href="#3-4-Logic-APP-配置邮件告警" class="headerlink" title="3.4 Logic APP 配置邮件告警"></a>3.4 Logic APP 配置邮件告警</h3><p>&nbsp;</p>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>总体上，一个通过消息队列 Azure Eventhub 以及 Databricks 做流计算处理的示例就完成了。如果消息生产者 Producer 不断产生消息，那么整个任务就会一直运行下去，当出现目标消息的时候就会不断的持续告警。在 Spark 推出 Structure Streaming 以后，也解决了 Spark Streaming microbatch 的局限性。介绍完流式计算，下一篇聊聊 Azure Databricks SparkSQL ，敬请期待吧~</p>
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" class="archive-article-date">
-  <time datetime="2020-09-03T13:19:01.000Z" itemprop="datePublished">Sep 3</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/">使用 jsDelivr CDN 加速 Github Pages</a>
-    </h1>
-  
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5jd2gv0023b72bpwlrbukz" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">Share</a>
+      
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" class="archive-article-date">
-  <time datetime="2020-01-23T02:07:50.000Z" itemprop="datePublished">Jan 23</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/">Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall</a>
-    </h1>
-  
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/" class="archive-article-date">
-  <time datetime="2020-01-18T07:45:29.000Z" itemprop="datePublished">Jan 18</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/">集成 Microsoft Azure Monitor Restful API 来监控 MongoDB</a>
-    </h1>
-  
+        <a class="article-reward-link">Reward</a>
+      
 
-    </header>
-  </div>
-</article>
-  
-    
-    
       
-        </div></section>
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/wxsblog.github.io/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/wxsblog.github.io/2019/12/09/2019-12-09-AzureDMS/" class="archive-article-date">
-  <time datetime="2019-12-08T17:37:52.000Z" itemprop="datePublished">Dec 9</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/wxsblog.github.io/2019/12/09/2019-12-09-AzureDMS/">Azure Database Migration Service — 数据库迁移到 Microsoft Azure 平台的好帮手</a>
-    </h1>
-  
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Bigdata/">Bigdata</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Databricks/">Databricks</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Microsoft-Azure/">Microsoft Azure</a></li></ul>
 
-    </header>
+    </footer>
   </div>
-</article>
   
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/wxsblog.github.io/2019/11/17/2019-11-18-FlinkonAKS/" class="archive-article-date">
-  <time datetime="2019-11-17T02:23:32.000Z" itemprop="datePublished">Nov 17</time>
-</a>
-      
+<nav id="article-nav">
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/wxsblog.github.io/2019/11/17/2019-11-18-FlinkonAKS/">新一代大数据计算框架 Flink 与 Microsoft Azure Kubernetes 集成来做流批计算</a>
-    </h1>
   
+    <a href="/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Azure Databricks 系列 Blog（二）之流计算 Structure Streaming</div>
+    </a>
+  
+</nav>
 
-    </header>
-  </div>
+  
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/wxsblog.github.io/2019/10/13/2019-10-13-SparkonAKS/" class="archive-article-date">
-  <time datetime="2019-10-13T02:23:32.000Z" itemprop="datePublished">Oct 13</time>
-</a>
-      
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/wxsblog.github.io/2019/10/13/2019-10-13-SparkonAKS/">强强联合! 利用 Microsoft Azure AKS 集群集成 Apache Spark 来做大数据计算</a>
-    </h1>
-  
 
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
 
 </section>
       

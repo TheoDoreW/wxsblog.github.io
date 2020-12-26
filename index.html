@@ -73,6 +73,68 @@
     <div class="outer">
       <section id="main">
   
+    <article id="post-2020-12-17-AzureDatabricksSparkSQLonDeltaLake" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" class="article-date">
+  <time datetime="2020-12-17T11:09:13.000Z" itemprop="datePublished">2020-12-17</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/">Microsoft Azure</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/">Databricks</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/Bigdata/">Bigdata</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/Bigdata/Linux/">Linux</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/">Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p><a href="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/">上一篇</a>介绍了 Azure Databricks 流计算框架 Structure Streaming，展示了一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文就来介绍并演示下 SparkSQL，一个可以通过 Spark 来进行 SQL 分析的可实时可离线的计算框架。本文场景基于集成 Azure Datalake Gen2 并 Enable Databricks Delta Lake 作为外部存储实现计算存储分离，通过 SparkSQL 新冠肺炎实时统计数据，资源依然沿用前面 Demo 所创建的资源组，具体如何实现，且听下文分解。</p>
+<p>&nbsp;</p>
+<h2 id="2-Delta-Lake-介绍及-Azure-Datalake-Gen2-集成"><a href="#2-Delta-Lake-介绍及-Azure-Datalake-Gen2-集成" class="headerlink" title="2. Delta Lake 介绍及 Azure Datalake Gen2 集成"></a>2. Delta Lake 介绍及 Azure Datalake Gen2 集成</h2><p>Delta Lake 是可提高数据湖可靠性的开源存储层，由 Databricks 开发并开源出来。 Delta Lake 提供 ACID 事务和可缩放的元数据处理，并可以统一流处理和批数据处理。 Delta Lake 在现有 Data Lake 的顶层运行，并且可以与 Apache Spark API 完全兼容。具体而言，Delta Lake 提供：<br><strong>Spark 上的 ACID 事务：</strong>可序列化的隔离级别可避免读者看到不一致的数据。<br><strong>可缩放的元数据处理：</strong>利用 Spark 的分布式处理能力，轻松处理包含数十亿文件的 PB 级表的所有元数据。<br><strong>流式处理和批处理统一：</strong>Delta Lake 中的表是批处理表，也是流式处理源和接收器。 流式处理数据引入、批处理历史回填、交互式查询功能都是现成的。<br><strong>架构强制：</strong>自动处理架构变体，以防在引入过程中插入错误的记录。<br><strong>按时间顺序查看：</strong>数据版本控制支持回滚、完整的历史审核线索和可重现的机器学习试验。<br><strong>更新插入和删除：</strong>支持合并、更新和删除操作，以启用复杂用例，如更改数据捕获、渐变维度 (SCD) 操作、流式处理更新插入等。<br>总的来说，Delta Lake 不仅仅在需要事务的 ACID 场景给予支持，并且针对性能也做了相当大的代码优化，本文的实现也是基于 Delta Lake，需要注意数据格式需要转换成 delta。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-marketecture.png" "height:750px"="" width="750px" div="" align="center/"></p>
+<p>正常 Azure Datalake Gen2 与 Delta Lake 的集成需要在 Spark 中增加配置项 “spark.delta.logStore.class=org.apache.spark.sql.delta.storage.AzureLogStore”, 并且集群需要在 lib 库中支持 hadoop-azure-datalake/hadoop-azure/wildfly-openssl JAR，具体过程可以见<a href="https://docs.delta.io/latest/delta-storage.html#azure-data-lake-storage-gen2" target="_blank" rel="noopener">这里</a>。所以这时候 PaaS 的优势就显示出来了，Azure Databricks 在 Cluster 创建好的同时就已经在集群上启用了该库，直接调用即可。 Azure Datalake Gen2 的创建过程本文不赘述，具体见<a href="https://docs.microsoft.com/en-us/azure/storage/blobs/create-data-lake-storage-account" target="_blank" rel="noopener">官方文档</a>。本文介绍两种常见的集成方式，如下图所示并做几点说明：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Gen2.png" "height:750px"="" width="750px" div="" align="center/"></p>
+<font color="blue"><strong>整个数据流：Producer 生产者发送数据 &rarr; Eventhub Entity ingestion &rarr; Databricks Structured Streaming &rarr; Eventhub Entity alerting &rarr; Logic App</strong></font>
+
+<p>&nbsp;</p>
+<h2 id="3-Azure-Databrick-Structure-Streaming-实现"><a href="#3-Azure-Databrick-Structure-Streaming-实现" class="headerlink" title="3. Azure Databrick Structure Streaming 实现"></a>3. Azure Databrick Structure Streaming 实现</h2><h3 id="3-1-Terraform-自动化部署"><a href="#3-1-Terraform-自动化部署" class="headerlink" title="3.1 Terraform 自动化部署"></a>3.1 Terraform 自动化部署</h3><h3 id="3-2-Producer-代码发布"><a href="#3-2-Producer-代码发布" class="headerlink" title="3.2 Producer 代码发布"></a>3.2 Producer 代码发布</h3><h3 id="3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成"><a href="#3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成" class="headerlink" title="3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成"></a>3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成</h3><h3 id="3-4-Logic-APP-配置邮件告警"><a href="#3-4-Logic-APP-配置邮件告警" class="headerlink" title="3.4 Logic APP 配置邮件告警"></a>3.4 Logic APP 配置邮件告警</h3><p>&nbsp;</p>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>总体上，一个通过消息队列 Azure Eventhub 以及 Databricks 做流计算处理的示例就完成了。如果消息生产者 Producer 不断产生消息，那么整个任务就会一直运行下去，当出现目标消息的时候就会不断的持续告警。在 Spark 推出 Structure Streaming 以后，也解决了 Spark Streaming microbatch 的局限性。介绍完流式计算，下一篇聊聊 Azure Databricks SparkSQL ，敬请期待吧~</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5jd2gv0023b72bpwlrbukz" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">Share</a>
+      
+
+      
+
+      
+        <a class="article-reward-link">Reward</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Bigdata/">Bigdata</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Databricks/">Databricks</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Linux/">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Microsoft-Azure/">Microsoft Azure</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-2020-11-06-AzureDatabricksStructureStreaming" class="article article-type-post" itemscope="" itemprop="blogPost">
   <div class="article-meta">
     <a href="/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" class="article-date">
@@ -130,7 +192,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckia6dvyf000e942buzqnark6" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckj5jd2gk001zb72b7b3cixz6" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
@@ -201,7 +263,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="ckia6dvxy0006942bx071d8k0" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="ckj5jd2gt0020b72bfrltcl0j" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
       
 
       
@@ -270,7 +332,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="ckia6dvyd000d942bgkjuruhx" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="ckj5jd2gh001xb72bqch5c2d7" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
       
 
       
@@ -354,7 +416,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="ckia6dvy40009942bd7isoi09" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="ckj5jd2gc001ub72bfz4vcjbi" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
       
 
       
@@ -435,7 +497,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/" data-id="ckia6dvy9000a942bddt8lcso" class="article-share-link" data-share="baidu" data-title="集成 Microsoft Azure Monitor Restful API 来监控 MongoDB">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/" data-id="ckj5jd2ge001vb72b8j7b894r" class="article-share-link" data-share="baidu" data-title="集成 Microsoft Azure Monitor Restful API 来监控 MongoDB">Share</a>
       
 
       
@@ -519,7 +581,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/12/09/2019-12-09-AzureDMS/" data-id="ckia6dvxf0000942bopesw9cy" class="article-share-link" data-share="baidu" data-title="Azure Database Migration Service — 数据库迁移到 Microsoft Azure 平台的好帮手">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/12/09/2019-12-09-AzureDMS/" data-id="ckj5jd2fi0005b72bfonfmxya" class="article-share-link" data-share="baidu" data-title="Azure Database Migration Service — 数据库迁移到 Microsoft Azure 平台的好帮手">Share</a>
       
 
       
@@ -614,7 +676,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/11/17/2019-11-18-FlinkonAKS/" data-id="ckia6dvxq0004942b7u7qv43o" class="article-share-link" data-share="baidu" data-title="新一代大数据计算框架 Flink 与 Microsoft Azure Kubernetes 集成来做流批计算">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/11/17/2019-11-18-FlinkonAKS/" data-id="ckj5jd2fa0001b72bevh9l0ft" class="article-share-link" data-share="baidu" data-title="新一代大数据计算框架 Flink 与 Microsoft Azure Kubernetes 集成来做流批计算">Share</a>
       
 
       
@@ -702,7 +764,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/10/13/2019-10-13-SparkonAKS/" data-id="ckia6dvxt0005942b9v1p3w63" class="article-share-link" data-share="baidu" data-title="强强联合! 利用 Microsoft Azure AKS 集群集成 Apache Spark 来做大数据计算">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/10/13/2019-10-13-SparkonAKS/" data-id="ckj5jd2f20000b72bbhga2u8u" class="article-share-link" data-share="baidu" data-title="强强联合! 利用 Microsoft Azure AKS 集群集成 Apache Spark 来做大数据计算">Share</a>
       
 
       
@@ -767,7 +829,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/01/18/2019-01-18-WSL/" data-id="ckia6dvxl0001942b1dsx8tro" class="article-share-link" data-share="baidu" data-title="Win10强大的WSL(Windows Subsystem for Linux)">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/01/18/2019-01-18-WSL/" data-id="ckj5jd2fg0004b72butuepwrv" class="article-share-link" data-share="baidu" data-title="Win10强大的WSL(Windows Subsystem for Linux)">Share</a>
       
 
       
@@ -796,7 +858,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Categories</h3>
     <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Linux/">Linux</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Linux/Windows-10/">Windows 10</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Linux/Windows-10/WSL/">WSL</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/">Microsoft Azure</a><span class="category-list-count">8</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Database/">Database</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Database/MySQL/">MySQL</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Database/MySQL/Linux/">Linux</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/">Databricks</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/Bigdata/">Bigdata</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/Bigdata/Linux/">Linux</a><span class="category-list-count">2</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/">Github</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/CDN/">CDN</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/CDN/Linux/">Linux</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Kubernetes/">Kubernetes</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Kubernetes/Bigdata/">Bigdata</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Kubernetes/Bigdata/Flink/">Flink</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Kubernetes/Bigdata/Flink/Linux/">Linux</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Kubernetes/Bigdata/Linux/">Linux</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/">Monitor</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/MongoDB/">MongoDB</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/MongoDB/Linux/">Linux</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/SNMP/">SNMP</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/SNMP/Linux/">Linux</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/SNMP/Linux/Fortigate/">Fortigate</a><span class="category-list-count">1</span></li></ul></li></ul></li></ul></li></ul></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Linux/">Linux</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Linux/Windows-10/">Windows 10</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Linux/Windows-10/WSL/">WSL</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/">Microsoft Azure</a><span class="category-list-count">9</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Database/">Database</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Database/MySQL/">MySQL</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Database/MySQL/Linux/">Linux</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/">Databricks</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/Bigdata/">Bigdata</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Databricks/Bigdata/Linux/">Linux</a><span class="category-list-count">3</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/">Github</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/CDN/">CDN</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/CDN/Linux/">Linux</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Kubernetes/">Kubernetes</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Kubernetes/Bigdata/">Bigdata</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Kubernetes/Bigdata/Flink/">Flink</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Kubernetes/Bigdata/Flink/Linux/">Linux</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Kubernetes/Bigdata/Linux/">Linux</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/">Monitor</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/MongoDB/">MongoDB</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/MongoDB/Linux/">Linux</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/SNMP/">SNMP</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/SNMP/Linux/">Linux</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Monitor/SNMP/Linux/Fortigate/">Fortigate</a><span class="category-list-count">1</span></li></ul></li></ul></li></ul></li></ul></li></ul>
     </div>
   </div>
 
@@ -805,7 +867,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Bigdata/">Bigdata</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/CDN/">CDN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Database/">Database</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Databricks/">Databricks</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Flink/">Flink</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Fortigate/">Fortigate</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Github/">Github</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Kubernetes/">Kubernetes</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Linux/">Linux</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Microsoft-Azure/">Microsoft Azure</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/MongoDB/">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Monitor/">Monitor</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/MySQL/">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/SNMP/">SNMP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/WSL/">WSL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Windows-10/">Windows 10</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Bigdata/">Bigdata</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/CDN/">CDN</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Database/">Database</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Databricks/">Databricks</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Flink/">Flink</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Fortigate/">Fortigate</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Github/">Github</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Kubernetes/">Kubernetes</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Linux/">Linux</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Microsoft-Azure/">Microsoft Azure</a><span class="tag-list-count">9</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/MongoDB/">MongoDB</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Monitor/">Monitor</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/MySQL/">MySQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/SNMP/">SNMP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/WSL/">WSL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/wxsblog.github.io/tags/Windows-10/">Windows 10</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -814,7 +876,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/wxsblog.github.io/tags/Bigdata/" style="font-size: 15px;">Bigdata</a> <a href="/wxsblog.github.io/tags/CDN/" style="font-size: 10px;">CDN</a> <a href="/wxsblog.github.io/tags/Database/" style="font-size: 10px;">Database</a> <a href="/wxsblog.github.io/tags/Databricks/" style="font-size: 12.5px;">Databricks</a> <a href="/wxsblog.github.io/tags/Flink/" style="font-size: 10px;">Flink</a> <a href="/wxsblog.github.io/tags/Fortigate/" style="font-size: 10px;">Fortigate</a> <a href="/wxsblog.github.io/tags/Github/" style="font-size: 10px;">Github</a> <a href="/wxsblog.github.io/tags/Kubernetes/" style="font-size: 12.5px;">Kubernetes</a> <a href="/wxsblog.github.io/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/wxsblog.github.io/tags/Microsoft-Azure/" style="font-size: 17.5px;">Microsoft Azure</a> <a href="/wxsblog.github.io/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/wxsblog.github.io/tags/Monitor/" style="font-size: 12.5px;">Monitor</a> <a href="/wxsblog.github.io/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/wxsblog.github.io/tags/SNMP/" style="font-size: 10px;">SNMP</a> <a href="/wxsblog.github.io/tags/WSL/" style="font-size: 10px;">WSL</a> <a href="/wxsblog.github.io/tags/Windows-10/" style="font-size: 10px;">Windows 10</a>
+      <a href="/wxsblog.github.io/tags/Bigdata/" style="font-size: 16px;">Bigdata</a> <a href="/wxsblog.github.io/tags/CDN/" style="font-size: 10px;">CDN</a> <a href="/wxsblog.github.io/tags/Database/" style="font-size: 10px;">Database</a> <a href="/wxsblog.github.io/tags/Databricks/" style="font-size: 14px;">Databricks</a> <a href="/wxsblog.github.io/tags/Flink/" style="font-size: 10px;">Flink</a> <a href="/wxsblog.github.io/tags/Fortigate/" style="font-size: 10px;">Fortigate</a> <a href="/wxsblog.github.io/tags/Github/" style="font-size: 10px;">Github</a> <a href="/wxsblog.github.io/tags/Kubernetes/" style="font-size: 12px;">Kubernetes</a> <a href="/wxsblog.github.io/tags/Linux/" style="font-size: 20px;">Linux</a> <a href="/wxsblog.github.io/tags/Microsoft-Azure/" style="font-size: 18px;">Microsoft Azure</a> <a href="/wxsblog.github.io/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/wxsblog.github.io/tags/Monitor/" style="font-size: 12px;">Monitor</a> <a href="/wxsblog.github.io/tags/MySQL/" style="font-size: 10px;">MySQL</a> <a href="/wxsblog.github.io/tags/SNMP/" style="font-size: 10px;">SNMP</a> <a href="/wxsblog.github.io/tags/WSL/" style="font-size: 10px;">WSL</a> <a href="/wxsblog.github.io/tags/Windows-10/" style="font-size: 10px;">Windows 10</a>
     </div>
   </div>
 
@@ -823,7 +885,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2020/11/">November 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2020/09/">September 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2020/01/">January 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2019/12/">December 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2019/11/">November 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2019/10/">October 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2019/01/">January 2019</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2020/12/">December 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2020/11/">November 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2020/09/">September 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2020/01/">January 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2019/12/">December 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2019/11/">November 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2019/10/">October 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/wxsblog.github.io/archives/2019/01/">January 2019</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -833,6 +895,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/">Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake</a>
+          </li>
         
           <li>
             <a href="/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/">Azure Databricks 系列 Blog（二）之流计算 Structure Streaming</a>
@@ -848,10 +914,6 @@
         
           <li>
             <a href="/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/">Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall</a>
-          </li>
-        
-          <li>
-            <a href="/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/">集成 Microsoft Azure Monitor Restful API 来监控 MongoDB</a>
           </li>
         
       </ul>
