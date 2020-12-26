@@ -4,12 +4,12 @@
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="utf-8">
   
-  <title>Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake | 茶包哥的迷你仓</title>
+  <title>Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake | 茶包哥的迷你仓</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了 Spark 的实时流计算框架 Structure Streaming。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL">
 <meta name="keywords" content="Linux,Microsoft Azure,Bigdata,Databricks">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">
+<meta property="og:title" content="Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake">
 <meta property="og:url" content="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/index.html">
 <meta property="og:site_name" content="茶包哥的迷你仓">
 <meta property="og:description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了 Spark 的实时流计算框架 Structure Streaming。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL">
@@ -18,9 +18,9 @@
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Gen2.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Container.jpg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-SparkSQL.jpg">
-<meta property="og:updated_time" content="2020-12-26T10:54:50.021Z">
+<meta property="og:updated_time" content="2020-12-26T10:58:49.118Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">
+<meta name="twitter:title" content="Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake">
 <meta name="twitter:description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了 Spark 的实时流计算框架 Structure Streaming。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL">
 <meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-marketecture.png">
   
@@ -96,7 +96,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake
+      Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake
     </h1>
   
 
@@ -114,7 +114,7 @@
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Gen2.png" "height:850px"="" width="850px" div="" align="center/"></p>
 <p><font color="blue"><strong>cmd2：非挂载方式</strong></font><br>cmd2 中通过 scala 代码演示 Azure Databricks 集成 Azure Datalake Gen2 的认证配置项，通过创建拥有 IAM Role “Storage Blob Data Contributor” 的 Service Principle 来做认证，验证通过后就可以直接调用 Datalake 里面的文件了，注意相关变量需要替换。</p>
 <p><font color="blue"><strong>cmd3：挂载方式</strong></font><br>cmd3 中通过 Python 代码演示 Azure Databricks 如何挂载 Azure Datalake Gen2，身份验证过程和 cmd2 的方式一样。这种方式的好处是直接可以可以把远端的 Azure Datalake 挂载到 Azure Databricks 上，就好像在使用本地磁盘一样使用 Datalake，本文更推荐并且采用该模式，同时注意相关变量需要替换。</p>
-<p>另外，本文的环境由于都是在 Azure 中国区，所以相关的域名都是 <a href="https://login.partner.microsoftonline.cn，如果在" target="_blank" rel="noopener">https://login.partner.microsoftonline.cn，如果在</a> Azure Global，那么注意域名是 <a href="https://login.microsoftonline.com。" target="_blank" rel="noopener">https://login.microsoftonline.com。</a> 其实从最佳实践的角度来说，本文并不是实现的最好方式，因为在 Notebook 里面的认证信息全部都是明文出现，最好的方式应该集成 Azure Key Vault 来隐藏密码，该方式不再本文赘述，有兴趣的同学自行研究吧，附上<a href="https://docs.microsoft.com/en-us/azure/databricks/data/data-sources/azure/azure-datalake-gen2" target="_blank" rel="noopener">链接</a>供参考。</p>
+<p>另外，本文的环境由于都是在 Azure 中国区，所以相关的域名都是 <a href="https://login.partner.microsoftonline.cn，" target="_blank" rel="noopener">https://login.partner.microsoftonline.cn，</a> 如果在 Azure Global，那么注意域名是 <a href="https://login.microsoftonline.com。" target="_blank" rel="noopener">https://login.microsoftonline.com。</a> 其实从最佳实践的角度来说，本文并不是实现的最好方式，因为在 Notebook 里面的认证信息全部都是明文出现，最好的方式应该集成 Azure Key Vault 来隐藏密码，该方式不再本文赘述，有兴趣的同学自行研究吧，附上<a href="https://docs.microsoft.com/en-us/azure/databricks/data/data-sources/azure/azure-datalake-gen2" target="_blank" rel="noopener">链接</a>供参考。</p>
 <p>&nbsp;</p>
 <h2 id="3-引入数据源并运行-SparkSQL"><a href="#3-引入数据源并运行-SparkSQL" class="headerlink" title="3. 引入数据源并运行 SparkSQL"></a>3. 引入数据源并运行 SparkSQL</h2><p>前面提到，本文所采用的示例数据是和新冠肺炎实时统计数据相关，讲到这里介绍一个微软提供的一个开放数据集 Repo，链接在<a href="https://azure.microsoft.com/zh-cn/services/open-datasets/catalog/" target="_blank" rel="noopener">这里</a>，包括各种场景下的 csv/json/parquet 格式的原始和脱敏数据，本文所使用的新冠肺炎数据也是在这里获取的，选择 csv 格式数据作为数据源，下载好之后 upload 到 Azure DataLake 上，在 container data 下面再创建个 source folder 作为存放原始数据的目录径。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Container.jpg" "height:850px"="" width="850px" div="" align="center/"></p>
@@ -128,7 +128,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5l8ejy000rjk2brm4u8yt2" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5ldfw10024kn2b8y1w9mgf" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake">Share</a>
       
 
       
@@ -205,7 +205,7 @@
       <ul>
         
           <li>
-            <a href="/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/">Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake</a>
+            <a href="/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/">Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake</a>
           </li>
         
           <li>
