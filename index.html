@@ -99,7 +99,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p><a href="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/">上一篇</a>介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文就来介绍并演示下 SparkSQL，一个可以通过 Spark 来进行 SQL 分析的可实时可离线的计算框架。本文场景基于集成 Azure Datalake Gen2 并 Enable Databricks Delta Lake 作为外部存储实现计算存储分离，通过 SparkSQL 新冠肺炎实时统计数据，资源依然沿用前面 Demo 所创建的资源组，具体如何实现，且听下文分解。</p>
+        <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p><a href="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/">上一篇</a>介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了 Spark 的实时流计算框架 Structure Streaming。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文就来介绍并演示下 SparkSQL，一个可以通过 Spark 来进行 SQL 分析的可实时可离线的计算框架。本文场景基于集成 Azure Datalake Gen2 并 Enable Databricks Delta Lake 作为外部存储实现计算存储分离，通过 SparkSQL 新冠肺炎实时统计数据，资源依然沿用前面 Demo 所创建的资源组，具体如何实现，且听下文分解。</p>
 <p>&nbsp;</p>
 <h2 id="2-Delta-Lake-介绍及-Azure-Datalake-Gen2-集成"><a href="#2-Delta-Lake-介绍及-Azure-Datalake-Gen2-集成" class="headerlink" title="2. Delta Lake 介绍及 Azure Datalake Gen2 集成"></a>2. Delta Lake 介绍及 Azure Datalake Gen2 集成</h2><p>Delta Lake 是可提高数据湖可靠性的开源存储层，由 Databricks 开发并开源出来。 Delta Lake 提供 ACID 事务和可缩放的元数据处理，并可以统一流处理和批数据处理。 Delta Lake 在现有 Data Lake 的顶层运行，并且可以与 Apache Spark API 完全兼容。具体而言，Delta Lake 提供：</p>
 <p><strong>Spark 上的 ACID 事务：</strong>可序列化的隔离级别可避免读者看到不一致的数据。<br><strong>可缩放的元数据处理：</strong>利用 Spark 的分布式处理能力，轻松处理包含数十亿文件的 PB 级表的所有元数据。<br><strong>流式处理和批处理统一：</strong>Delta Lake 中的表是批处理表，也是流式处理源和接收器。 流式处理数据引入、批处理历史回填、交互式查询功能都是现成的。<br><strong>架构强制：</strong>自动处理架构变体，以防在引入过程中插入错误的记录。<br><strong>按时间顺序查看：</strong>数据版本控制支持回滚、完整的历史审核线索和可重现的机器学习试验。<br><strong>更新插入和删除：</strong>支持合并、更新和删除操作，以启用复杂用例，如更改数据捕获、渐变维度 (SCD) 操作、流式处理更新插入等。</p>
@@ -123,7 +123,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5l5dov001pih2bragtb0he" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5l8ejy000rjk2brm4u8yt2" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">Share</a>
       
 
       
@@ -200,7 +200,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckj5l5dos001oih2bhwxj07mo" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckj5l8ejv000qjk2borc6yvmu" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
@@ -271,7 +271,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="ckj5l5doq001lih2bko3o8x7n" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="ckj5l8ejs000njk2bcnweozta" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
       
 
       
@@ -340,7 +340,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="ckj5l5doo001kih2bklsz2pib" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="ckj5l8ejq000mjk2b2o7zk7t1" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
       
 
       
@@ -424,7 +424,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="ckj5l5dom001iih2bbogddnm2" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="ckj5l8ejm000jjk2bmjf5y961" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
       
 
       
@@ -505,7 +505,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/" data-id="ckj5l5doi001fih2bweyqyr61" class="article-share-link" data-share="baidu" data-title="集成 Microsoft Azure Monitor Restful API 来监控 MongoDB">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/" data-id="ckj5l8ejl000ijk2bayf48tcf" class="article-share-link" data-share="baidu" data-title="集成 Microsoft Azure Monitor Restful API 来监控 MongoDB">Share</a>
       
 
       
@@ -589,7 +589,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/12/09/2019-12-09-AzureDMS/" data-id="ckj5l5dok001gih2brzoskj0a" class="article-share-link" data-share="baidu" data-title="Azure Database Migration Service — 数据库迁移到 Microsoft Azure 平台的好帮手">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/12/09/2019-12-09-AzureDMS/" data-id="ckj5l8ejh000hjk2btv3udr7e" class="article-share-link" data-share="baidu" data-title="Azure Database Migration Service — 数据库迁移到 Microsoft Azure 平台的好帮手">Share</a>
       
 
       
@@ -684,7 +684,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/11/17/2019-11-18-FlinkonAKS/" data-id="ckj5l5dnr0004ih2be97n3idl" class="article-share-link" data-share="baidu" data-title="新一代大数据计算框架 Flink 与 Microsoft Azure Kubernetes 集成来做流批计算">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/11/17/2019-11-18-FlinkonAKS/" data-id="ckj5l8eje000ejk2bpg4g8gwt" class="article-share-link" data-share="baidu" data-title="新一代大数据计算框架 Flink 与 Microsoft Azure Kubernetes 集成来做流批计算">Share</a>
       
 
       
@@ -772,7 +772,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/10/13/2019-10-13-SparkonAKS/" data-id="ckj5l5dnl0001ih2btjysxxuh" class="article-share-link" data-share="baidu" data-title="强强联合! 利用 Microsoft Azure AKS 集群集成 Apache Spark 来做大数据计算">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/10/13/2019-10-13-SparkonAKS/" data-id="ckj5l8ejc000djk2bmazl9elu" class="article-share-link" data-share="baidu" data-title="强强联合! 利用 Microsoft Azure AKS 集群集成 Apache Spark 来做大数据计算">Share</a>
       
 
       
@@ -837,7 +837,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/01/18/2019-01-18-WSL/" data-id="ckj5l5dnf0000ih2b1ga6lkgx" class="article-share-link" data-share="baidu" data-title="Win10强大的WSL(Windows Subsystem for Linux)">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/01/18/2019-01-18-WSL/" data-id="ckj5l8eig0000jk2bprgd5ypi" class="article-share-link" data-share="baidu" data-title="Win10强大的WSL(Windows Subsystem for Linux)">Share</a>
       
 
       

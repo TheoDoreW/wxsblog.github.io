@@ -6,22 +6,22 @@
   
   <title>Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake | 茶包哥的迷你仓</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文就">
+  <meta name="description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了 Spark 的实时流计算框架 Structure Streaming。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL">
 <meta name="keywords" content="Linux,Microsoft Azure,Bigdata,Databricks">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">
 <meta property="og:url" content="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/index.html">
 <meta property="og:site_name" content="茶包哥的迷你仓">
-<meta property="og:description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文就">
+<meta property="og:description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了 Spark 的实时流计算框架 Structure Streaming。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-marketecture.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Gen2.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Container.jpg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-SparkSQL.jpg">
-<meta property="og:updated_time" content="2020-12-26T10:49:25.479Z">
+<meta property="og:updated_time" content="2020-12-26T10:54:50.021Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">
-<meta name="twitter:description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文就">
+<meta name="twitter:description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了 Spark 的实时流计算框架 Structure Streaming。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL">
 <meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-marketecture.png">
   
     <link rel="alternative" href="/atom.xml" title="茶包哥的迷你仓" type="application/atom+xml">
@@ -104,7 +104,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p><a href="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/">上一篇</a>介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文就来介绍并演示下 SparkSQL，一个可以通过 Spark 来进行 SQL 分析的可实时可离线的计算框架。本文场景基于集成 Azure Datalake Gen2 并 Enable Databricks Delta Lake 作为外部存储实现计算存储分离，通过 SparkSQL 新冠肺炎实时统计数据，资源依然沿用前面 Demo 所创建的资源组，具体如何实现，且听下文分解。</p>
+        <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p><a href="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/">上一篇</a>介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了 Spark 的实时流计算框架 Structure Streaming。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文就来介绍并演示下 SparkSQL，一个可以通过 Spark 来进行 SQL 分析的可实时可离线的计算框架。本文场景基于集成 Azure Datalake Gen2 并 Enable Databricks Delta Lake 作为外部存储实现计算存储分离，通过 SparkSQL 新冠肺炎实时统计数据，资源依然沿用前面 Demo 所创建的资源组，具体如何实现，且听下文分解。</p>
 <p>&nbsp;</p>
 <h2 id="2-Delta-Lake-介绍及-Azure-Datalake-Gen2-集成"><a href="#2-Delta-Lake-介绍及-Azure-Datalake-Gen2-集成" class="headerlink" title="2. Delta Lake 介绍及 Azure Datalake Gen2 集成"></a>2. Delta Lake 介绍及 Azure Datalake Gen2 集成</h2><p>Delta Lake 是可提高数据湖可靠性的开源存储层，由 Databricks 开发并开源出来。 Delta Lake 提供 ACID 事务和可缩放的元数据处理，并可以统一流处理和批数据处理。 Delta Lake 在现有 Data Lake 的顶层运行，并且可以与 Apache Spark API 完全兼容。具体而言，Delta Lake 提供：</p>
 <p><strong>Spark 上的 ACID 事务：</strong>可序列化的隔离级别可避免读者看到不一致的数据。<br><strong>可缩放的元数据处理：</strong>利用 Spark 的分布式处理能力，轻松处理包含数十亿文件的 PB 级表的所有元数据。<br><strong>流式处理和批处理统一：</strong>Delta Lake 中的表是批处理表，也是流式处理源和接收器。 流式处理数据引入、批处理历史回填、交互式查询功能都是现成的。<br><strong>架构强制：</strong>自动处理架构变体，以防在引入过程中插入错误的记录。<br><strong>按时间顺序查看：</strong>数据版本控制支持回滚、完整的历史审核线索和可重现的机器学习试验。<br><strong>更新插入和删除：</strong>支持合并、更新和删除操作，以启用复杂用例，如更改数据捕获、渐变维度 (SCD) 操作、流式处理更新插入等。</p>
@@ -128,7 +128,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5l5dov001pih2bragtb0he" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5l8ejy000rjk2brm4u8yt2" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">Share</a>
       
 
       
