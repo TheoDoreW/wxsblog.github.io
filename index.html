@@ -109,16 +109,21 @@
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Gen2.png" "height:850px"="" width="850px" div="" align="center/"></p>
 <p><font color="blue"><strong>cmd2：非挂载方式</strong></font><br>cmd2 中通过 scala 代码演示 Azure Databricks 集成 Azure Datalake Gen2 的认证配置项，通过创建拥有 IAM Role “Storage Blob Data Contributor” 的 Service Principle 来做认证，验证通过后就可以直接调用 Datalake 里面的文件了，注意相关变量需要替换。</p>
 <p><font color="blue"><strong>cmd3：挂载方式</strong></font><br>cmd3 中通过 Python 代码演示 Azure Databricks 如何挂载 Azure Datalake Gen2，身份验证过程和 cmd2 的方式一样。这种方式的好处是直接可以可以把远端的 Azure Datalake 挂载到 Azure Databricks 上，就好像在使用本地磁盘一样使用 Datalake，本文更推荐并且采用该模式，同时注意相关变量需要替换。</p>
-<p>另外，本文的环境由于都是在 Azure 中国区，所以相关的域名都是 <a href="https://login.partner.microsoftonline.cn，如果在" target="_blank" rel="noopener">https://login.partner.microsoftonline.cn，如果在</a> Azure Global，那么注意域名是 <a href="https://login.microsoftonline.com。其实从最佳实践的角度来说，本文并不是实现的最好方式，因为在" target="_blank" rel="noopener">https://login.microsoftonline.com。其实从最佳实践的角度来说，本文并不是实现的最好方式，因为在</a> Notebook 里面的认证信息全部都是明文出现，最好的方式应该集成 Azure Key Vault 来隐藏密码，该方式不再本文赘述，有兴趣的同学自行研究吧，附上<a href="https://docs.microsoft.com/en-us/azure/databricks/data/data-sources/azure/azure-datalake-gen2" target="_blank" rel="noopener">链接</a>供参考。</p>
+<p>另外，本文的环境由于都是在 Azure 中国区，所以相关的域名都是 <a href="https://login.partner.microsoftonline.cn，如果在" target="_blank" rel="noopener">https://login.partner.microsoftonline.cn，如果在</a> Azure Global，那么注意域名是 <a href="https://login.microsoftonline.com。" target="_blank" rel="noopener">https://login.microsoftonline.com。</a> 其实从最佳实践的角度来说，本文并不是实现的最好方式，因为在 Notebook 里面的认证信息全部都是明文出现，最好的方式应该集成 Azure Key Vault 来隐藏密码，该方式不再本文赘述，有兴趣的同学自行研究吧，附上<a href="https://docs.microsoft.com/en-us/azure/databricks/data/data-sources/azure/azure-datalake-gen2" target="_blank" rel="noopener">链接</a>供参考。</p>
 <p>&nbsp;</p>
-<h2 id="3-Azure-Databrick-Structure-Streaming-实现"><a href="#3-Azure-Databrick-Structure-Streaming-实现" class="headerlink" title="3. Azure Databrick Structure Streaming 实现"></a>3. Azure Databrick Structure Streaming 实现</h2><h3 id="3-1-Terraform-自动化部署"><a href="#3-1-Terraform-自动化部署" class="headerlink" title="3.1 Terraform 自动化部署"></a>3.1 Terraform 自动化部署</h3><h3 id="3-2-Producer-代码发布"><a href="#3-2-Producer-代码发布" class="headerlink" title="3.2 Producer 代码发布"></a>3.2 Producer 代码发布</h3><h3 id="3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成"><a href="#3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成" class="headerlink" title="3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成"></a>3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成</h3><h3 id="3-4-Logic-APP-配置邮件告警"><a href="#3-4-Logic-APP-配置邮件告警" class="headerlink" title="3.4 Logic APP 配置邮件告警"></a>3.4 Logic APP 配置邮件告警</h3><p>&nbsp;</p>
+<h2 id="3-引入数据源并运行-SparkSQL"><a href="#3-引入数据源并运行-SparkSQL" class="headerlink" title="3. 引入数据源并运行 SparkSQL"></a>3. 引入数据源并运行 SparkSQL</h2><p>前面提到，本文所采用的示例数据是和新冠肺炎实时统计数据相关，讲到这里介绍一个微软提供的一个开放数据集 Repo，链接在<a href="https://azure.microsoft.com/zh-cn/services/open-datasets/catalog/" target="_blank" rel="noopener">这里</a>，包括各种场景下的 csv/json/parquet 格式的原始和脱敏数据，本文所使用的新冠肺炎数据也是在这里获取的，选择 csv 格式数据作为数据源，下载好之后 upload 到 Azure DataLake 上，在 container data 下面再创建个 source folder 作为存放原始数据的目录径。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Container.jpg" "height:850px"="" width="850px" div="" align="center/"></p>
+<p>原始数据确定好之后，就可以通过 Notebook 来做 SparkSQL 分析了，本文用到的示例 Notebook 已经上传到了<a href="https://github.com/TheoDoreW/wxsblog.github.io/blob/master/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/DemoNotebook/DeltaLake-SparkSQL.ipynb" target="_blank" rel="noopener">这里</a>，几个重要配置简单说明下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-SparkSQL.jpg" "height:850px"="" width="850px" div="" align="center/"></p>
+<p><strong>COVIDDF：</strong>COVIDDF 为定义的 DataFrame，通过 spark.read.format(‘csv’) 格式并指定挂载路径引入数据；<br><strong>COVIDDF.write.mode(“append”).format(“delta”)：</strong>通过 append 追加的方式写入目标 Table 中，注意这里的格式 delta，也就是前面提到的需要做格式转换，写入的表也需要指定路径，并会在 Azure Dalalake 中生成相应的文件；<br><strong>ChinaCOVID 及 ChinaCOVID1：</strong>经过上面的建表过程之后就可以运行 SparkSQL 来做 SQL 查询了；</p>
+<h3 id="3-2-Producer-代码发布"><a href="#3-2-Producer-代码发布" class="headerlink" title="3.2 Producer 代码发布"></a>3.2 Producer 代码发布</h3><h3 id="3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成"><a href="#3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成" class="headerlink" title="3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成"></a>3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成</h3><h3 id="3-4-Logic-APP-配置邮件告警"><a href="#3-4-Logic-APP-配置邮件告警" class="headerlink" title="3.4 Logic APP 配置邮件告警"></a>3.4 Logic APP 配置邮件告警</h3><p>&nbsp;</p>
 <h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>总体上，一个通过消息队列 Azure Eventhub 以及 Databricks 做流计算处理的示例就完成了。如果消息生产者 Producer 不断产生消息，那么整个任务就会一直运行下去，当出现目标消息的时候就会不断的持续告警。在 Spark 推出 Structure Streaming 以后，也解决了 Spark Streaming microbatch 的局限性。介绍完流式计算，下一篇聊聊 Azure Databricks SparkSQL ，敬请期待吧~</p>
 
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5k76770024ga2b72qh5uy5" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5ky3aw001zhe2b4ibkf99i" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">Share</a>
       
 
       
@@ -195,7 +200,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckj5k76740021ga2bevn1u424" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="ckj5ky3aq001xhe2bku77urpb" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
@@ -266,7 +271,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="ckj5k76720020ga2bojosh75a" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="ckj5ky3ba0025he2bzqf906jt" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
       
 
       
@@ -335,7 +340,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="ckj5k7670001yga2be3dj8x1d" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="ckj5ky3b00021he2bj3kj0q67" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
       
 
       
@@ -419,7 +424,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="ckj5k766y001wga2bh5m2xcwx" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="ckj5ky3b70022he2buytursrz" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
       
 
       
@@ -500,7 +505,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/" data-id="ckj5k766x001vga2b71y6nw95" class="article-share-link" data-share="baidu" data-title="集成 Microsoft Azure Monitor Restful API 来监控 MongoDB">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/" data-id="ckj5ky3an001whe2bxfbnfksh" class="article-share-link" data-share="baidu" data-title="集成 Microsoft Azure Monitor Restful API 来监控 MongoDB">Share</a>
       
 
       
@@ -584,7 +589,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/12/09/2019-12-09-AzureDMS/" data-id="ckj5k765m0005ga2bct0ofkf0" class="article-share-link" data-share="baidu" data-title="Azure Database Migration Service — 数据库迁移到 Microsoft Azure 平台的好帮手">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/12/09/2019-12-09-AzureDMS/" data-id="ckj5ky3980004he2bj5z0f960" class="article-share-link" data-share="baidu" data-title="Azure Database Migration Service — 数据库迁移到 Microsoft Azure 平台的好帮手">Share</a>
       
 
       
@@ -679,7 +684,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/11/17/2019-11-18-FlinkonAKS/" data-id="ckj5k765i0004ga2b51wg4ymk" class="article-share-link" data-share="baidu" data-title="新一代大数据计算框架 Flink 与 Microsoft Azure Kubernetes 集成来做流批计算">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/11/17/2019-11-18-FlinkonAKS/" data-id="ckj5ky38n0000he2bblz3w2x9" class="article-share-link" data-share="baidu" data-title="新一代大数据计算框架 Flink 与 Microsoft Azure Kubernetes 集成来做流批计算">Share</a>
       
 
       
@@ -767,7 +772,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/10/13/2019-10-13-SparkonAKS/" data-id="ckj5k765d0001ga2bjefbldcl" class="article-share-link" data-share="baidu" data-title="强强联合! 利用 Microsoft Azure AKS 集群集成 Apache Spark 来做大数据计算">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/10/13/2019-10-13-SparkonAKS/" data-id="ckj5ky38x0001he2blolph3xu" class="article-share-link" data-share="baidu" data-title="强强联合! 利用 Microsoft Azure AKS 集群集成 Apache Spark 来做大数据计算">Share</a>
       
 
       
@@ -832,7 +837,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/01/18/2019-01-18-WSL/" data-id="ckj5k76550000ga2bsnwxdt8g" class="article-share-link" data-share="baidu" data-title="Win10强大的WSL(Windows Subsystem for Linux)">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2019/01/18/2019-01-18-WSL/" data-id="ckj5ky39c0005he2bnd3jv7pf" class="article-share-link" data-share="baidu" data-title="Win10强大的WSL(Windows Subsystem for Linux)">Share</a>
       
 
       
