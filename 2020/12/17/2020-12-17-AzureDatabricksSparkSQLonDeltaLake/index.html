@@ -7,7 +7,7 @@
   <title>Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake | 茶包哥的迷你仓</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文就">
-<meta name="keywords" content="Microsoft Azure,Bigdata,Linux,Databricks">
+<meta name="keywords" content="Linux,Microsoft Azure,Bigdata,Databricks">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">
 <meta property="og:url" content="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/index.html">
@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Gen2.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-Container.jpg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-SparkSQL.jpg">
-<meta property="og:updated_time" content="2020-12-26T10:46:31.626Z">
+<meta property="og:updated_time" content="2020-12-26T10:49:25.479Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">
 <meta name="twitter:description" content="1. 前言上一篇介绍了 Azure Databricks 流计算框架 Structure Streaming，通过一个 Demo 演示了下 Spark 可以做到准实时的流计算框架。但是在实际业务中，光有实时数据流是不够的，离线数据的计算和分析也非常重要，并且往往离线分析才能获取业务上所需要的更多的 Insights，而一般来说离线的数据分析都会跑一些 OLAP SQL 查询，所以基于此场景，本文就">
@@ -121,14 +121,14 @@
 <p>原始数据确定好之后，就可以通过 Notebook 来做 SparkSQL 分析了，本文用到的示例 Notebook 已经上传到了<a href="https://github.com/TheoDoreW/wxsblog.github.io/blob/master/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/DemoNotebook/DeltaLake-SparkSQL.ipynb" target="_blank" rel="noopener">这里</a>，几个重要配置简单说明下：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/Delta-Lake-Azure-DataLake-SparkSQL.jpg" "height:850px"="" width="850px" div="" align="center/"></p>
 <p><strong>COVIDDF：</strong>COVIDDF 为定义的 DataFrame，通过 spark.read.format(‘csv’) 格式并指定挂载路径引入数据；<br><strong>COVIDDF.write.mode(“append”).format(“delta”)：</strong>通过 append 追加的方式写入目标 Table 中，注意这里的格式 delta，也就是前面提到的需要做格式转换，写入的表也需要指定路径，并会在 Azure Dalalake 中生成相应的文件；<br><strong>ChinaCOVID 及 ChinaCOVID1：</strong>经过上面的建表过程之后就可以运行 SparkSQL 来做 SQL 查询了；</p>
-<h3 id="3-2-Producer-代码发布"><a href="#3-2-Producer-代码发布" class="headerlink" title="3.2 Producer 代码发布"></a>3.2 Producer 代码发布</h3><h3 id="3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成"><a href="#3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成" class="headerlink" title="3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成"></a>3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成</h3><h3 id="3-4-Logic-APP-配置邮件告警"><a href="#3-4-Logic-APP-配置邮件告警" class="headerlink" title="3.4 Logic APP 配置邮件告警"></a>3.4 Logic APP 配置邮件告警</h3><p>&nbsp;</p>
-<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>总体上，一个通过消息队列 Azure Eventhub 以及 Databricks 做流计算处理的示例就完成了。如果消息生产者 Producer 不断产生消息，那么整个任务就会一直运行下去，当出现目标消息的时候就会不断的持续告警。在 Spark 推出 Structure Streaming 以后，也解决了 Spark Streaming microbatch 的局限性。介绍完流式计算，下一篇聊聊 Azure Databricks SparkSQL ，敬请期待吧~</p>
+<p>&nbsp;</p>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>一个通过集成 Azure Datalake Gen2 作为外部存储并采用 Delta Lake 格式进行 SparkSQL 分析的示例就完成了，本文基本上使用了 PySpark 来实现，其实除此之外通过 SQL 或者 Scala 也是一样可以实现的，有兴趣的同学可以自己再深入研究下吧。</p>
 
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5ky3aw001zhe2b4ibkf99i" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="ckj5l5dov001pih2bragtb0he" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on DeltaLake">Share</a>
       
 
       
