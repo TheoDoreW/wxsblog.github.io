@@ -98,7 +98,7 @@
       
         <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>最近一直在和客户聊云上资源迁移的相关事宜，借着客户的需求测试了一下 Azure MySQL Flexible Server ( <strong>后文简称 MySQLFS</strong> ) 集成 Custom DNS 的场景，其实<a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking">官方文档</a>是有一些说明的，不过为了使方案更直观，还是记录下来方便以后查询，包括其中遇到的“坑”和 Limit 。</p>
 <h2 id="2-需求背景介绍"><a href="#2-需求背景介绍" class="headerlink" title="2. 需求背景介绍"></a>2. 需求背景介绍</h2><p>客户原本用的是 Azure MySQL Single Server ，现要迁移 MySQLFS ，由于 MySQLFS 的网络集成模型和 Single Server 有一些区别，所以在迁移的过程中顺便改造成更安全的内网集成方案。与之前不同的是，MySQLFS 支持 VNet integration 这种 Private access 网络集成方式，这种方式可以让 MySQL 实例只拥有一个 Private IP —— 以 VNet Injection 的方式集成到 VNet 中，具体的网络部署模型可以参考以下这张图：</p>
-<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/Arch.png&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/Arch.png&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
+<p>&lt;img src&#x3D;’<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/Arch.png&#39;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/Arch.png&#39;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
 <p>需求是在 VNet Peering 互联的前提下，能否在对端 VNet 中的 MySQL Client 使用 Custom DNS 配置来成功访问 VNet Integration MySQLFS ，那答案肯定是可以的，不然这篇 Blog 也就没有存在的意义了，好了废话不多说了，直接开搞。</p>
 <h2 id="3-Azure-MySQL-Flexible-Server-内网集成-Custom-DNS-测试"><a href="#3-Azure-MySQL-Flexible-Server-内网集成-Custom-DNS-测试" class="headerlink" title="3. Azure MySQL Flexible Server 内网集成 Custom DNS 测试"></a>3. Azure MySQL Flexible Server 内网集成 Custom DNS 测试</h2><p>具体的测试环境如下图所示：</p>
 <p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/Vnet-Diagram.png&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/Vnet-Diagram.png&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
@@ -129,7 +129,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2022/11/11/2022-11-11-AzureMySQLFlexibleServerNetworking/" data-id="claq8w7on000t45xz1zrlcryv" class="article-share-link" data-share="baidu" data-title="Azure MySQL Flexible Server 内网 DNS 集成方案blog">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2022/11/11/2022-11-11-AzureMySQLFlexibleServerNetworking/" data-id="claq90brv000r7dxz63f3b9mp" class="article-share-link" data-share="baidu" data-title="Azure MySQL Flexible Server 内网 DNS 集成方案blog">Share</a>
       
 
       
@@ -207,7 +207,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/26/2021-07-26-AzureImageBuilderCLSIGI/" data-id="claq8w7om000r45xz57fd1dhp" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（二）之自动化构建自定义托管镜像 CentOS 7.7 并集成 Azure Shared Image Gallery 做全球分发">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/26/2021-07-26-AzureImageBuilderCLSIGI/" data-id="claq90bs700617dxz964b6zoj" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（二）之自动化构建自定义托管镜像 CentOS 7.7 并集成 Azure Shared Image Gallery 做全球分发">Share</a>
       
 
       
@@ -283,7 +283,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/25/2021-07-25-AzureImageBuilderCLMI/" data-id="claq8w7ol000p45xzdxsudd29" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（一）之自动化构建自定义托管镜像 CentOS 7.7">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/25/2021-07-25-AzureImageBuilderCLMI/" data-id="claq90bru000p7dxz5ing5ooa" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（一）之自动化构建自定义托管镜像 CentOS 7.7">Share</a>
       
 
       
@@ -395,7 +395,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/03/17/2021-03-17-AzureDatabricksMonitor/" data-id="claq8w7ol000n45xzgvuu824t" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（四）之通过 Azure Monitor 做集群监控">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/03/17/2021-03-17-AzureDatabricksMonitor/" data-id="claq90bru000n7dxz4m9y8lsj" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（四）之通过 Azure Monitor 做集群监控">Share</a>
       
 
       
@@ -465,7 +465,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="claq8w7ok000j45xzcar1dd5m" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="claq90brt000j7dxz77lpek7c" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake">Share</a>
       
 
       
@@ -541,7 +541,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="claq8w7ok000h45xz2pol1fdo" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="claq90brt000h7dxz06wc2cn9" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
@@ -612,7 +612,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="claq8w7oj000e45xz1oqp5iqu" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="claq90brq00097dxz9y967tn9" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
       
 
       
@@ -623,75 +623,6 @@
 
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Bigdata/" rel="tag">Bigdata</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Databricks/" rel="tag">Databricks</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Linux/" rel="tag">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Microsoft-Azure/" rel="tag">Microsoft Azure</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-2020-09-03-GithubCDN" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" class="article-date">
-  <time datetime="2020-09-03T13:19:01.000Z" itemprop="datePublished">2020-09-03</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/">Microsoft Azure</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/">Github</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/CDN/">CDN</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/CDN/Linux/">Linux</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/">使用 jsDelivr CDN 加速 Github Pages</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>Github Pages 是个非常好的用来托管静态网页的功能，所以很多同学用来把自己的 Blog 放在上面去做托管，这么酷的功能既能让你心满意足地写博客，又可以同时找到 Coding 感觉，配合着静态站点生成器比如说 <a target="_blank" rel="noopener" href="https://jekyllrb.com/">Jekyll</a>、<a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>，自己还不需要做维护，何乐而不为~ 不过这里面有个不太方面国内使用的问题，Github 服务器都在海外，在国内访问 Github Pages Blog 会出现访问比较慢的问题，尤其是 Blog 中需要加载的图片，稍微大一点的需要加载很长时间，但是 Github 在微软收购之后依然良心， 此时本文的主角登场，<a target="_blank" rel="noopener" href="https://www.jsdelivr.com/">jsDelivr CDN</a>。</p>
-<p>&amp;nbsp;</p>
-<h2 id="2-jsDelivr-CDN-介绍"><a href="#2-jsDelivr-CDN-介绍" class="headerlink" title="2. jsDelivr CDN 介绍"></a>2. jsDelivr CDN 介绍</h2><p>jsDelivr 是国外的一家优秀的公共 CDN 服务提供商，也是首个「打通中国大陆（网宿公司运营）与海外的免费 CDN 服务」，同时也为 npm、GitHub、WordPress 插件和具有特殊要求的其他几个项目的自定义终结点提供镜像。</p>
-<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/CDN-Introduction.jpg&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/CDN-Introduction.jpg&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
-<p>能够看出来，POP 点也是分布全球比较均匀的，最重要的是标红的那句，能够在中国使用！是不是很令人激动~ 本文就给大家演示下如何用 jsDelivr CDN 加速 Github Pages 的图床，这样图片就可以秒加载啦！</p>
-<p>&amp;nbsp;</p>
-<h2 id="3-使用-jsDelivr-CDN-加速-Github-Pages-图床"><a href="#3-使用-jsDelivr-CDN-加速-Github-Pages-图床" class="headerlink" title="3. 使用 jsDelivr CDN 加速 Github Pages 图床"></a>3. 使用 jsDelivr CDN 加速 Github Pages 图床</h2><h3 id="3-1-Github-配置"><a href="#3-1-Github-配置" class="headerlink" title="3.1 Github 配置"></a>3.1 Github 配置</h3><p>首先需要创建一个 Github Repo，然后生成一个 Token，使得使用这个 key 可以有权限控制该仓库。如下面两张图所示：</p>
-<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-Generate-Token.jpg&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-Generate-Token.jpg&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
-<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-Token-Access.jpg&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-Token-Access.jpg&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
-<p>记录好 Token，下面会用得到。</p>
-<h3 id="3-2-下载-PicGo-并配置"><a href="#3-2-下载-PicGo-并配置" class="headerlink" title="3.2 下载 PicGo 并配置"></a>3.2 下载 PicGo 并配置</h3><p>下载地址点击<a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/PicGo/releases">这里</a>，建议使用 GA 的版本，具体根据对应的平台下载相应的安装包即可，我们这里的环境是 Windows 10，那就选择 PicGo-Setup-2.2.2.exe 下载安装即可。安装好后，打开界面如图所示，有几个配置项，一一解释下：</p>
-<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/PicGo-Config.jpg&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/PicGo-Config.jpg&quot;</a> “height:600px” width&#x3D;”600px” div align&#x3D;center&#x2F;&gt;</p>
-<p><strong>设定仓库名：</strong>存放图床的 Repo 名字，一般都是 xxx&#x2F;xxx 格式；<br><strong>设定分支名：</strong>具体的分支，一般都是 master；<br><strong>设定 Token：</strong>3.1章节生成的 Token，填进去；<br><strong>指定存储路径：</strong>具体的 Repo 下面存储图片的路径；<br><strong>指定存储路径：</strong>一般都是 <a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/xxx/xxx@master">https://cdn.jsdelivr.net/gh/xxx/xxx@master</a> ，域名是 jsDelivr CDN 本身发布的域名，gh 代表 Github，xxx&#x2F;xxx@master 代表 Repo 以及 master 分支；</p>
-<p>配置好之后，就可以切换到 “图片上传” 选择 “图片上传 - GitHub图床” 后就可以上传图片了，支持拖拽、点击、剪贴板上传，上传后，图片链接直接复制的你的剪贴板中。</p>
-<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-PicGo.jpg&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-PicGo.jpg&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
-<p>能够看出来，Github 可以识别出来是通过 PicGo 上传的。</p>
-<p>&amp;nbsp;</p>
-<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>至此，Github Pages 使用 jsDelivr CDN 加速图片的教程就完成了。其实可以做的更细致，比如说 js 静态文件也通过 CDN 做加速，都可以配置的，剩余的工作交由感兴趣的同学们自己来完成啦。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="claq8w7oi000a45xza97wbhvu" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
-      
-
-      
-
-      
-        <a class="article-reward-link">Reward</a>
-      
-
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/CDN/" rel="tag">CDN</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Github/" rel="tag">Github</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Linux/" rel="tag">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Microsoft-Azure/" rel="tag">Microsoft Azure</a></li></ul>
 
     </footer>
   </div>
@@ -750,7 +681,76 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN-cn-xinswang-527/" data-id="claq8w7oj000d45xz952aambb" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN-cn-xinswang-527/" data-id="claq90brq00067dxza8dt2y3l" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
+      
+
+      
+
+      
+        <a class="article-reward-link">Reward</a>
+      
+
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/CDN/" rel="tag">CDN</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Github/" rel="tag">Github</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Linux/" rel="tag">Linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/wxsblog.github.io/tags/Microsoft-Azure/" rel="tag">Microsoft Azure</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2020-09-03-GithubCDN" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" class="article-date">
+  <time datetime="2020-09-03T13:19:01.000Z" itemprop="datePublished">2020-09-03</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/">Microsoft Azure</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/">Github</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/CDN/">CDN</a>►<a class="article-category-link" href="/wxsblog.github.io/categories/Microsoft-Azure/Github/CDN/Linux/">Linux</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/">使用 jsDelivr CDN 加速 Github Pages</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>Github Pages 是个非常好的用来托管静态网页的功能，所以很多同学用来把自己的 Blog 放在上面去做托管，这么酷的功能既能让你心满意足地写博客，又可以同时找到 Coding 感觉，配合着静态站点生成器比如说 <a target="_blank" rel="noopener" href="https://jekyllrb.com/">Jekyll</a>、<a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>，自己还不需要做维护，何乐而不为~ 不过这里面有个不太方面国内使用的问题，Github 服务器都在海外，在国内访问 Github Pages Blog 会出现访问比较慢的问题，尤其是 Blog 中需要加载的图片，稍微大一点的需要加载很长时间，但是 Github 在微软收购之后依然良心， 此时本文的主角登场，<a target="_blank" rel="noopener" href="https://www.jsdelivr.com/">jsDelivr CDN</a>。</p>
+<p>&amp;nbsp;</p>
+<h2 id="2-jsDelivr-CDN-介绍"><a href="#2-jsDelivr-CDN-介绍" class="headerlink" title="2. jsDelivr CDN 介绍"></a>2. jsDelivr CDN 介绍</h2><p>jsDelivr 是国外的一家优秀的公共 CDN 服务提供商，也是首个「打通中国大陆（网宿公司运营）与海外的免费 CDN 服务」，同时也为 npm、GitHub、WordPress 插件和具有特殊要求的其他几个项目的自定义终结点提供镜像。</p>
+<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/CDN-Introduction.jpg&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/CDN-Introduction.jpg&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
+<p>能够看出来，POP 点也是分布全球比较均匀的，最重要的是标红的那句，能够在中国使用！是不是很令人激动~ 本文就给大家演示下如何用 jsDelivr CDN 加速 Github Pages 的图床，这样图片就可以秒加载啦！</p>
+<p>&amp;nbsp;</p>
+<h2 id="3-使用-jsDelivr-CDN-加速-Github-Pages-图床"><a href="#3-使用-jsDelivr-CDN-加速-Github-Pages-图床" class="headerlink" title="3. 使用 jsDelivr CDN 加速 Github Pages 图床"></a>3. 使用 jsDelivr CDN 加速 Github Pages 图床</h2><h3 id="3-1-Github-配置"><a href="#3-1-Github-配置" class="headerlink" title="3.1 Github 配置"></a>3.1 Github 配置</h3><p>首先需要创建一个 Github Repo，然后生成一个 Token，使得使用这个 key 可以有权限控制该仓库。如下面两张图所示：</p>
+<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-Generate-Token.jpg&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-Generate-Token.jpg&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
+<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-Token-Access.jpg&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-Token-Access.jpg&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
+<p>记录好 Token，下面会用得到。</p>
+<h3 id="3-2-下载-PicGo-并配置"><a href="#3-2-下载-PicGo-并配置" class="headerlink" title="3.2 下载 PicGo 并配置"></a>3.2 下载 PicGo 并配置</h3><p>下载地址点击<a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/PicGo/releases">这里</a>，建议使用 GA 的版本，具体根据对应的平台下载相应的安装包即可，我们这里的环境是 Windows 10，那就选择 PicGo-Setup-2.2.2.exe 下载安装即可。安装好后，打开界面如图所示，有几个配置项，一一解释下：</p>
+<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/PicGo-Config.jpg&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/PicGo-Config.jpg&quot;</a> “height:600px” width&#x3D;”600px” div align&#x3D;center&#x2F;&gt;</p>
+<p><strong>设定仓库名：</strong>存放图床的 Repo 名字，一般都是 xxx&#x2F;xxx 格式；<br><strong>设定分支名：</strong>具体的分支，一般都是 master；<br><strong>设定 Token：</strong>3.1章节生成的 Token，填进去；<br><strong>指定存储路径：</strong>具体的 Repo 下面存储图片的路径；<br><strong>指定存储路径：</strong>一般都是 <a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/xxx/xxx@master">https://cdn.jsdelivr.net/gh/xxx/xxx@master</a> ，域名是 jsDelivr CDN 本身发布的域名，gh 代表 Github，xxx&#x2F;xxx@master 代表 Repo 以及 master 分支；</p>
+<p>配置好之后，就可以切换到 “图片上传” 选择 “图片上传 - GitHub图床” 后就可以上传图片了，支持拖拽、点击、剪贴板上传，上传后，图片链接直接复制的你的剪贴板中。</p>
+<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-PicGo.jpg&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-09-03-GithubCDN/Github-PicGo.jpg&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
+<p>能够看出来，Github 可以识别出来是通过 PicGo 上传的。</p>
+<p>&amp;nbsp;</p>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>至此，Github Pages 使用 jsDelivr CDN 加速图片的教程就完成了。其实可以做的更细致，比如说 js 静态文件也通过 CDN 做加速，都可以配置的，剩余的工作交由感兴趣的同学们自己来完成啦。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="claq90brs000d7dxzdxi14yvh" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
       
 
       
@@ -849,7 +849,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="claq8w7oh000945xzhhox2t0c" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="claq90brr000a7dxzb648frvc" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
       
 
       
