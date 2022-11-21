@@ -138,7 +138,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2022/11/11/2022-11-11-AzureMySQLFlexibleServerNetworking/" data-id="claqlg4vw000r70xz92zx3ec1" class="article-share-link" data-share="baidu" data-title="Azure MySQL Flexible Server 内网 DNS 集成方案">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2022/11/11/2022-11-11-AzureMySQLFlexibleServerNetworking/" data-id="claqlllc4000talxz1t4w7fb1" class="article-share-link" data-share="baidu" data-title="Azure MySQL Flexible Server 内网 DNS 集成方案">Share</a>
       
 
       
@@ -211,14 +211,15 @@
 
 <h3 id="3-5-创建-CentOS-7-7-VM-并登陆验证"><a href="#3-5-创建-CentOS-7-7-VM-并登陆验证" class="headerlink" title="3.5 创建 CentOS 7.7 VM 并登陆验证"></a>3.5 创建 CentOS 7.7 VM 并登陆验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">az vm create \</span><br><span class="line">  --resource-group <span class="variable">$sigResourceGroup</span> \</span><br><span class="line">  --name centos01 \</span><br><span class="line">  --admin-username centos \</span><br><span class="line">  --location <span class="variable">$location</span> \</span><br><span class="line">  --image <span class="string">&quot;/subscriptions/<span class="variable">$subscriptionID</span>/resourceGroups/<span class="variable">$sigResourceGroup</span>/providers/Microsoft.Compute/galleries/<span class="variable">$sigName</span>/images/<span class="variable">$imageDefName</span>/versions/latest&quot;</span> \</span><br><span class="line">  --ssh-key-value @id_rsa.pub</span><br><span class="line"></span><br><span class="line"><span class="comment"># and login...</span></span><br><span class="line"></span><br><span class="line">ssh centos@&lt;pubIp&gt;</span><br><span class="line"></span><br><span class="line">You should see the image was customized with a Message of the Day as soon as your SSH connection is established!</span><br><span class="line"></span><br><span class="line">******************************************************************</span><br><span class="line">**                   This VM was built from the:                **</span><br><span class="line">**     !! AZURE VM IMAGE BUILDER Custom CentOS 7.7 Image !!     **</span><br><span class="line">**                   You have just been Customized :-)          **</span><br><span class="line">******************************************************************</span><br></pre></td></tr></table></figure>
 
-<p>&amp;nbsp;</p>
+<br>
+
 <h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>至此，第二篇自动化构建自定义托管镜像 CentOS 7.7 并集成 Azure Shared Image Gallery 做全球分发的示例就完成了，希望能够给大家一些参考。</p>
 
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/26/2021-07-26-AzureImageBuilderCLSIGI/" data-id="claqlg4vv000o70xzh6affx46" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（二）之自动化构建自定义托管镜像 CentOS 7.7 并集成 Azure Shared Image Gallery 做全球分发">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/26/2021-07-26-AzureImageBuilderCLSIGI/" data-id="claqlllc2000nalxz6xxd56qa" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（二）之自动化构建自定义托管镜像 CentOS 7.7 并集成 Azure Shared Image Gallery 做全球分发">Share</a>
       
 
       
@@ -265,7 +266,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>云计算的自动化一直都是一个热门话题，无论 IaaS &#x2F; PaaS &#x2F; SaaS 都正在以 Everything As A Code 的方向发展，同时也诞生了很多优秀的云原生或第三方开源自动化工具，<a target="_blank" rel="noopener" href="https://www.packer.io/">HashiCorp Packer</a> 就是其中之一，一个镜像即代码的自动化构建镜像工具。相比开源界，云厂商更没有闲着，我软也不例外，最近在钻研 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/azure/aks/">Azure Kubernetes Service</a> 的同时发现了 Global Azure 目前在 Preview 的一个服务：<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/azure/virtual-machines/image-builder-overview">Azure Image Builder</a>（后文简称AIB）。该服务是构建在 Packer 上的 Azure 云托管服务，用户从基于 Windows 或 Linux 的 Azure 市场映像、现有自定义映像开始，添加自己的自定义项，只需提供一个描述映像的配置，将其提交给该服务，即可生成映像并进行分发，具体 Pipeline 如下图所示。好了，话不多说，第一篇博客我们来测测如何利用这个服务来构建自定义托管的 CentOS 7.7 镜像吧。</p>
-<p><a href="Image-Builder-Flow.png"><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2021-07-26-AzureImageBuilderCLSIGI/Image-Builder-Flow.png" height="800" width="800"/></a></p>
+<p><a href="Image-Builder-Flow.png"><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2021-07-25-AzureImageBuilderCLMI/Image-Builder-Flow.png" height="800" width="800"/></a></p>
 <br>
 
 <h2 id="2-前期准备工作"><a href="#2-前期准备工作" class="headerlink" title="2. 前期准备工作"></a>2. 前期准备工作</h2><p>目前 AIB 依然是 Global Azure Preview Service，所以还存在一些限制，包括 Location 以及 OS 版本等，具体在使用 AIB 之前建议充分查看<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/azure/virtual-machines/image-builder-overview">官方文档</a>。本文我们在 Global Azure Region Southeastasia 测试 CentOS 7.7，需要准备好 Global Azure 账户，配置好 Azure CLI，该测试在 Windows Subsystem v2 Ubuntu 18.04 上运行，需要注意该实验需要在一个 Session 内运行，因为要继承所有设置的自定义变量。</p>
@@ -289,14 +290,15 @@
 
 <h3 id="3-4-创建-CentOS-7-7-VM-并登陆验证"><a href="#3-4-创建-CentOS-7-7-VM-并登陆验证" class="headerlink" title="3.4 创建 CentOS 7.7 VM 并登陆验证"></a>3.4 创建 CentOS 7.7 VM 并登陆验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">az vm create \</span><br><span class="line">  --resource-group <span class="variable">$imageResourceGroup</span> \</span><br><span class="line">  --name centos01 \</span><br><span class="line">  --image <span class="variable">$imageName</span> \</span><br><span class="line">  --location <span class="variable">$location</span> \</span><br><span class="line">  --admin-username centos \</span><br><span class="line">  --ssh-key-value @id_rsa.pub</span><br><span class="line"></span><br><span class="line"><span class="comment"># and login...</span></span><br><span class="line"></span><br><span class="line">ssh centos@&lt;pubIp&gt;</span><br><span class="line"></span><br><span class="line">You should see the image was customized with a Message of the Day as soon as your SSH connection is established!</span><br><span class="line"></span><br><span class="line">******************************************************************</span><br><span class="line">**                   This VM was built from the:                **</span><br><span class="line">**     !! AZURE VM IMAGE BUILDER Custom CentOS 7.7 Image !!     **</span><br><span class="line">**                   You have just been Customized :-)          **</span><br><span class="line">******************************************************************</span><br></pre></td></tr></table></figure>
 
-<p>&amp;nbsp;</p>
+<br>
+
 <h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>至此，通过 AIB 自动化构建 CentOS 7.7 镜像的示例就完成了，希望能够给大家一些参考，把这个服务有机的集成利用起来。</p>
 
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/25/2021-07-25-AzureImageBuilderCLMI/" data-id="claqlg4vv000m70xzbkpqd89x" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（一）之自动化构建自定义托管镜像 CentOS 7.7">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/25/2021-07-25-AzureImageBuilderCLMI/" data-id="claqlllc1000lalxz209d4bvh" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（一）之自动化构建自定义托管镜像 CentOS 7.7">Share</a>
       
 
       
@@ -414,7 +416,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/03/17/2021-03-17-AzureDatabricksMonitor/" data-id="claqlg4vu000l70xz6nsufu0v" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（四）之通过 Azure Monitor 做集群监控">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/03/17/2021-03-17-AzureDatabricksMonitor/" data-id="claqlllc0000halxz40hudbzd" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（四）之通过 Azure Monitor 做集群监控">Share</a>
       
 
       
@@ -484,7 +486,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="claqlg4vt000i70xz0inh62yp" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="claqlllc0000ialxzdb3x4ve7" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake">Share</a>
       
 
       
@@ -560,7 +562,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="claqlg4vs000h70xzawa02lm9" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="claqlllc3000ralxzbn96g8ux" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
@@ -631,7 +633,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="claqlg4vq000a70xz0v5kaykd" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="claqlllbz000ealxzf9so5vjo" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
       
 
       
@@ -700,7 +702,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN-cn-xinswang-527/" data-id="claqlg4vn000670xze6tkhflf" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN-cn-xinswang-527/" data-id="claqlllbv0005alxzcu337o8v" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
       
 
       
@@ -769,7 +771,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="claqlg4vr000d70xzcjm1ha9x" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="claqlllby000dalxz63s4b9q3" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
       
 
       
@@ -868,7 +870,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="claqlg4vr000e70xzbmuyho9g" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="claqlllbx000aalxzeo1w7p8f" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
       
 
       

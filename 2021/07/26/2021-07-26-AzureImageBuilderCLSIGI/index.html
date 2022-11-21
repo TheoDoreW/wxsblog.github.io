@@ -15,7 +15,7 @@
 <meta property="og:locale">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2021-07-26-AzureImageBuilderCLSIGI/Shared-Image-Gallery.png">
 <meta property="article:published_time" content="2021-07-26T15:33:56.000Z">
-<meta property="article:modified_time" content="2022-11-21T09:33:35.602Z">
+<meta property="article:modified_time" content="2022-11-21T09:38:08.705Z">
 <meta property="article:author" content="Xinsheng Wang">
 <meta property="article:tag" content="Microsoft Azure">
 <meta property="article:tag" content="Linux">
@@ -129,14 +129,15 @@
 
 <h3 id="3-5-创建-CentOS-7-7-VM-并登陆验证"><a href="#3-5-创建-CentOS-7-7-VM-并登陆验证" class="headerlink" title="3.5 创建 CentOS 7.7 VM 并登陆验证"></a>3.5 创建 CentOS 7.7 VM 并登陆验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">az vm create \</span><br><span class="line">  --resource-group <span class="variable">$sigResourceGroup</span> \</span><br><span class="line">  --name centos01 \</span><br><span class="line">  --admin-username centos \</span><br><span class="line">  --location <span class="variable">$location</span> \</span><br><span class="line">  --image <span class="string">&quot;/subscriptions/<span class="variable">$subscriptionID</span>/resourceGroups/<span class="variable">$sigResourceGroup</span>/providers/Microsoft.Compute/galleries/<span class="variable">$sigName</span>/images/<span class="variable">$imageDefName</span>/versions/latest&quot;</span> \</span><br><span class="line">  --ssh-key-value @id_rsa.pub</span><br><span class="line"></span><br><span class="line"><span class="comment"># and login...</span></span><br><span class="line"></span><br><span class="line">ssh centos@&lt;pubIp&gt;</span><br><span class="line"></span><br><span class="line">You should see the image was customized with a Message of the Day as soon as your SSH connection is established!</span><br><span class="line"></span><br><span class="line">******************************************************************</span><br><span class="line">**                   This VM was built from the:                **</span><br><span class="line">**     !! AZURE VM IMAGE BUILDER Custom CentOS 7.7 Image !!     **</span><br><span class="line">**                   You have just been Customized :-)          **</span><br><span class="line">******************************************************************</span><br></pre></td></tr></table></figure>
 
-<p>&amp;nbsp;</p>
+<br>
+
 <h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>至此，第二篇自动化构建自定义托管镜像 CentOS 7.7 并集成 Azure Shared Image Gallery 做全球分发的示例就完成了，希望能够给大家一些参考。</p>
 
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/26/2021-07-26-AzureImageBuilderCLSIGI/" data-id="claqlg4vv000o70xzh6affx46" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（二）之自动化构建自定义托管镜像 CentOS 7.7 并集成 Azure Shared Image Gallery 做全球分发">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/26/2021-07-26-AzureImageBuilderCLSIGI/" data-id="claqlllc2000nalxz6xxd56qa" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（二）之自动化构建自定义托管镜像 CentOS 7.7 并集成 Azure Shared Image Gallery 做全球分发">Share</a>
       
 
       
