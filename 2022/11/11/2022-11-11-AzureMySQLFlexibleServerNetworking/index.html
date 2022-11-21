@@ -6,15 +6,15 @@
   
   <title>Azure MySQL Flexible Server 内网 DNS 集成方案blog | 茶包哥的迷你仓</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="1. 前言最近一直在和客户聊云上资源迁移的相关事宜，借着客户的需求测试了一下 Azure MySQL Flexible Server ( 后文简称 MySQLFS ) 集成 Custom DNS 的场景，其实官方文档是有一些说明的，不过为了使方案更直观，还是记录下来方便以后查询，包括其中遇到的“坑”和 Limit 。 &amp;nbsp; 2. 需求背景介绍客户原本用的是 Azure MySQL">
+  <meta name="description" content="1. 前言最近一直在和客户聊云上资源迁移的相关事宜，借着客户的需求测试了一下 Azure MySQL Flexible Server ( 后文简称 MySQLFS ) 集成 Custom DNS 的场景，其实官方文档是有一些说明的，不过为了使方案更直观，还是记录下来方便以后查询，包括其中遇到的“坑”和 Limit 。 2. 需求背景介绍客户原本用的是 Azure MySQL Single Serv">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Azure MySQL Flexible Server 内网 DNS 集成方案blog">
 <meta property="og:url" content="https://theodorew.github.io/wxsblog.github.io/2022/11/11/2022-11-11-AzureMySQLFlexibleServerNetworking/index.html">
 <meta property="og:site_name" content="茶包哥的迷你仓">
-<meta property="og:description" content="1. 前言最近一直在和客户聊云上资源迁移的相关事宜，借着客户的需求测试了一下 Azure MySQL Flexible Server ( 后文简称 MySQLFS ) 集成 Custom DNS 的场景，其实官方文档是有一些说明的，不过为了使方案更直观，还是记录下来方便以后查询，包括其中遇到的“坑”和 Limit 。 &amp;nbsp; 2. 需求背景介绍客户原本用的是 Azure MySQL">
+<meta property="og:description" content="1. 前言最近一直在和客户聊云上资源迁移的相关事宜，借着客户的需求测试了一下 Azure MySQL Flexible Server ( 后文简称 MySQLFS ) 集成 Custom DNS 的场景，其实官方文档是有一些说明的，不过为了使方案更直观，还是记录下来方便以后查询，包括其中遇到的“坑”和 Limit 。 2. 需求背景介绍客户原本用的是 Azure MySQL Single Serv">
 <meta property="og:locale">
 <meta property="article:published_time" content="2022-11-11T06:45:17.000Z">
-<meta property="article:modified_time" content="2022-11-18T07:38:46.627Z">
+<meta property="article:modified_time" content="2022-11-21T03:45:02.500Z">
 <meta property="article:author" content="Xinsheng Wang">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="Microsoft Azure">
@@ -101,11 +101,9 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>最近一直在和客户聊云上资源迁移的相关事宜，借着客户的需求测试了一下 Azure MySQL Flexible Server ( <strong>后文简称 MySQLFS</strong> ) 集成 Custom DNS 的场景，其实<a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking">官方文档</a>是有一些说明的，不过为了使方案更直观，还是记录下来方便以后查询，包括其中遇到的“坑”和 Limit 。</p>
-<p>&amp;nbsp;</p>
 <h2 id="2-需求背景介绍"><a href="#2-需求背景介绍" class="headerlink" title="2. 需求背景介绍"></a>2. 需求背景介绍</h2><p>客户原本用的是 Azure MySQL Single Server ，现要迁移 MySQLFS ，由于 MySQLFS 的网络集成模型和 Single Server 有一些区别，所以在迁移的过程中顺便改造成更安全的内网集成方案。与之前不同的是，MySQLFS 支持 VNet integration 这种 Private access 网络集成方式，这种方式可以让 MySQL 实例只拥有一个 Private IP —— 以 VNet Injection 的方式集成到 VNet 中，具体的网络部署模型可以参考以下这张图：</p>
 <p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/Arch.png&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/Arch.png&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
 <p>需求是在 VNet Peering 互联的前提下，能否在对端 VNet 中的 MySQL Client 使用 Custom DNS 配置来成功访问 VNet Integration MySQLFS ，那答案肯定是可以的，不然这篇 Blog 也就没有存在的意义了，好了废话不多说了，直接开搞。</p>
-<p>&amp;nbsp;</p>
 <h2 id="3-Azure-MySQL-Flexible-Server-内网集成-Custom-DNS-测试"><a href="#3-Azure-MySQL-Flexible-Server-内网集成-Custom-DNS-测试" class="headerlink" title="3. Azure MySQL Flexible Server 内网集成 Custom DNS 测试"></a>3. Azure MySQL Flexible Server 内网集成 Custom DNS 测试</h2><p>具体的测试环境如下图所示：</p>
 <p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/Vnet-Diagram.png&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/Vnet-Diagram.png&quot;</a> “height:800px” width&#x3D;”800px” div align&#x3D;center&#x2F;&gt;</p>
 <p>简单介绍下架构: VNet1 和 VNet2 通过 VNet Peering 打通，分别划分两个 Subnet for DNS Server 和 MySQLFS 实例，每个 Subnet 分别挂 NSG ，</p>
@@ -135,7 +133,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2022/11/11/2022-11-11-AzureMySQLFlexibleServerNetworking/" data-id="claq8nfrv0061z4xz3g8z2d16" class="article-share-link" data-share="baidu" data-title="Azure MySQL Flexible Server 内网 DNS 集成方案blog">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2022/11/11/2022-11-11-AzureMySQLFlexibleServerNetworking/" data-id="claq8w7on000t45xz1zrlcryv" class="article-share-link" data-share="baidu" data-title="Azure MySQL Flexible Server 内网 DNS 集成方案blog">Share</a>
       
 
       
