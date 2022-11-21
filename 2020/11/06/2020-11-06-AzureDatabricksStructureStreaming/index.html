@@ -16,13 +16,13 @@
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Arch.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Resources.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Clusters.jpg">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Eventhub-Maven-Central-Installation.jpg">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Eventhub-Maven-Central-Installation.png">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Streaming-Notebook.jpg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Streaming-Status.jpg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/LogicApp-Alerting-Designer.jpg">
 <meta property="og:image" content="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/LogicApp-Email-Alert.jpg">
 <meta property="article:published_time" content="2020-11-06T04:35:53.000Z">
-<meta property="article:modified_time" content="2022-11-21T09:54:00.237Z">
+<meta property="article:modified_time" content="2022-11-21T10:03:33.033Z">
 <meta property="article:author" content="Xinsheng Wang">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="Microsoft Azure">
@@ -119,13 +119,12 @@
 <br>
 
 <h2 id="3-Azure-Databrick-Structure-Streaming-实现"><a href="#3-Azure-Databrick-Structure-Streaming-实现" class="headerlink" title="3. Azure Databrick Structure Streaming 实现"></a>3. Azure Databrick Structure Streaming 实现</h2><h3 id="3-1-Terraform-自动化部署"><a href="#3-1-Terraform-自动化部署" class="headerlink" title="3.1 Terraform 自动化部署"></a>3.1 Terraform 自动化部署</h3><p>通过 Terraform 部署的服务组件包括 Azure Virtual Machine、 Azure Databricks、Eventhub、Logic App，具体的 tf 文件和变量见<a target="_blank" rel="noopener" href="https://github.com/TheoDoreW/wxsblog.github.io/tree/master/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/Terraform">这里</a>，每一项服务 Terraform Azure Provider 都有 Resource 支持，具体可以参考<a target="_blank" rel="noopener" href="https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs">官方文档</a>。部署完成之后的资源清单如下图所示，所有资源都部署在中国北二区域。</p>
-<p>&lt;img src&#x3D;”<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Resources.png&quot;">https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Resources.png&quot;</a> “height:900px” width&#x3D;”900px” div align&#x3D;center&#x2F;&gt;</p>
 <p><a href="Databricks-Structure-Streaming-Resources.png"><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Structure-Streaming-Resources.png" height="950" width="950"/></a></p>
 <h3 id="3-2-Producer-代码发布"><a href="#3-2-Producer-代码发布" class="headerlink" title="3.2 Producer 代码发布"></a>3.2 Producer 代码发布</h3><p>模拟的生产者代码通过 VM 发布，通过调用 Azure Eventhub 的 SDK 将 Messages 进行写入，具体代码见<a target="_blank" rel="noopener" href="https://github.com/TheoDoreW/wxsblog.github.io/blob/master/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/PythonProducer/Producer.py">这里</a>，几个重要配置简单说明下：<br><strong>azure.eventhub：</strong>Azure Eventhub SDK 包，需要通过 pip3 install azure.eventhub 来指定安装。<br><strong>create_batch()：</strong>通过该方法 batch 发送数据，本次示例以 1 条消息为 1 个 batch 发送到 Eventhub Entity ingestion。<br><strong>CONNECTION_STR：</strong>Azure Eventhub Endpoint，该连接字符串可以在 Portal 上 Shared access policies 的 Connection string–primary key 查看。<br><strong>EVENTHUB_NAME：</strong>写入的 Eventhub Entity Name。</p>
 <h3 id="3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成"><a href="#3-3-Azure-Databricks-集群配置及-Structure-Streaming-Notebook-集成" class="headerlink" title="3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成"></a>3.3 Azure Databricks 集群配置及 Structure Streaming Notebook 集成</h3><p>Azure Databricks 的创建过程是先需要在 Azure 上创建一个 Databricks 实体，然后在此基础上在实体内部创建 Workspace 以及 Cluster，再提交 Job 等等。针对 Databricks 资源，都会有唯一的 ID 和 Endpoint 与之对应，以便能够进行 Restful API 调用，集群通过 Databricks Portal 创建即可。本示例创建 1 Driver 2 Worker 共计 3 个节点的 Standard Cluster，Databricks 版本为 6.4 (includes Apache Spark 2.4.5, Scala 2.11)。如果需要做机器学习相关的计算，可以启用集成 GPU&#x2F;ML 框架的版本，详细说明见<a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/azure/databricks/release-notes/runtime/releases">官方文档</a>，不做赘述。</p>
 <p><a href="Databricks-Clusters.jpg"><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Clusters.jpg" height="900" width="900"/></a></p>
 <p>集群状态变为 Running 后就意味着 Ready 可以使用了，不过在导入 Python Notebook 之前，需要通过 Maven Central 安装 com.microsoft.azure:azure-eventhubs-spark 库文件以便安装 Spark 连接 Azure Eventhub Connector，需要注意库文件的版本要匹配。</p>
-<p><a href="Databricks-Eventhub-Maven-Central-Installation.jpg"><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Eventhub-Maven-Central-Installation.jpg" height="700" width="700"/></a></p>
+<p><a href="Databricks-Eventhub-Maven-Central-Installation.png"><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Eventhub-Maven-Central-Installation.png" height="700" width="700"/></a></p>
 <p>Notebook 可以直接在 Portal 里新建写入，也可以在 VS Code 等 IDE 编写完之后发布，本文采用第二种模式，原因是 IDE 丰富的插件可以提高效率。具体的 Notebook 本文不做展示，放在<a href="">这里</a>，有需要的读者可以自行查看。通过 import 导入后，附上导入后的截图并做几点说明：</p>
 <p><a href="Databricks-Streaming-Notebook.jpg"><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2020-11-06-AzureDatabricksStructureStreaming/Databricks-Streaming-Notebook.jpg" height="900" width="900"/></a></p>
 <p>整个 Notebook 分为三个 stage：<br><strong>第一阶段：</strong>从 Eventhub Entity ingestion 读取 Producer 写入的数据，通过 Streaming DataFrames 的 spark.readStream() 创建。<br><strong>第二阶段：</strong>通过 DataFrame 丰富的函数做字段筛选，筛选出来我们需要的字段。<br><strong>第二阶段：</strong>回写 Eventhub Entity alerting，通过 Streaming DataFrames 的 spark.writeStream() 流式写入，注意利用 checkpoint 方便任务终止再运行。</p>
@@ -143,7 +142,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="claqm6k6b0009g4xz51433puj" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="claqmeql7000djnxz47wob7ht" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
