@@ -128,17 +128,18 @@
 <p>能够看出来，自定义域名 <strong>vnet2-dbsn1-mysqlfs1.example.com</strong> CNAME 指向了 Azure MySQLFS FQDN，然后 FQDN CNAME 指向了最终的内网域名 <strong>vnet2-dbsn1-mysqlfs1.private.mysql.database.azure.com</strong> 并最终解析成内网地址 10.12.2.4。</p>
 <br>
 
-<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>至此，Azure MySQLFS 内网集成的两个场景就测试完毕了，其实大家应该能够感觉到 VNet Injection 这种网络模型其实基本上就是 VNet 里面的 VM，只是封装了一层变成 PaaS 服务暴露给用户，所以这么看的话大家是不是也知道网络层面的管控可以怎么做了？没错，就可以当作 VM 一样，通过 NSG 来限制出入口流量，这个测试下来也是没问题的，不过本篇就不做详细测试了，有需求的同学自己来做测试吧。最后再稍微提 3 个注意事项给到大家：</p>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>至此，Azure MySQLFS 内网集成的两个场景就测试完毕了，其实大家应该能够感觉到 VNet Injection 这种网络模型其实基本上就是 VNet 里面的 VM，只是封装了一层变成 PaaS 服务暴露给用户，所以这么看的话大家是不是也知道网络层面的管控可以怎么做了？没错，就可以当作 VM 一样，通过 NSG 来限制出入口流量，这个测试下来也是没问题的，不过本篇就不做详细测试了，有需求的同学自己来做测试吧。最后再稍微提几个注意事项给到大家：</p>
 <p><font color=Red><strong>1. 关于 Read Replica</strong></font><br><a href="MySQLFS-Read-Replica.jpg"><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/MySQLFS-Read-Replica.jpg" height="800" width="800"/></a><br><a href="MySQLFS-Read-Replica-DNS-Lookup.jpg"><img src="https://cdn.jsdelivr.net/gh/TheoDoreW/CDN_Images@master/images/2022-11-11-AzureMySQLFlexibleServerNetworking/MySQLFS-Read-Replica-DNS-Lookup.jpg" height="800" width="800"/></a><br>创建了两个只读副本，和 Master 一样，Azure 会根据 DHCP 继续向下分配内网地址给到只读副本，然后生成 A Record 解析。</p>
 <p><font color=Red><strong>2. 关于访问方式</strong></font><br>和研发和后台支持的同学们聊下来，无论是使用 FQDN 亦或 Custom DNS Domain Name，都强烈不建议使用内网 IP 来访问实例，在进行一些平台层面的维护或者启用 HA 的实例，都会发生 IP Floating，所以生产环境一定要用域名。</p>
 <p><font color=Red><strong>3. 关于数据迁移</strong></font><br>Azure DMS Service 针对 SingleServer - Flexbile Server 又推出了一个 online 的迁移方式，本来 online 这个功能都下线了，可能是为了方便客户做迁移，单独针对 MySQLFS 上线了，这个功能在这里提一句，后面我们也测试看看实际效果怎么样。</p>
+<p><font color=Red><strong>4. 域名解析</strong></font><br>以 VNet Injection 方式嵌入的 Azure MySQLFS 在域名解析上和其他云厂商有些许不同，经过测试发现非 VNet 环境是无法解析 MySQLFS 的内网域名的，像 AWS RDS 就不一样了，是可以在公网解析的，解析成 Private IP，只是无法访问罢了。</p>
 <p>暂时就能想到这些，先写这么多给大家参考吧，后面有啥补充我再查缺补漏，谢谢大家。</p>
 
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2022/11/11/2022-11-11-AzureMySQLFlexibleServerNetworking/" data-id="claqo3tpu005o28xz27udhpy9" class="article-share-link" data-share="baidu" data-title="Azure MySQL Flexible Server 内网 DNS 集成方案">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2022/11/11/2022-11-11-AzureMySQLFlexibleServerNetworking/" data-id="clat72drt006jyofkgi200wb8" class="article-share-link" data-share="baidu" data-title="Azure MySQL Flexible Server 内网 DNS 集成方案">Share</a>
       
 
       
@@ -219,7 +220,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/26/2021-07-26-AzureImageBuilderCLSIGI/" data-id="claqo3tpt005l28xzcyppa7ko" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（二）之自动化构建自定义托管镜像 CentOS 7.7 并集成 Azure Shared Image Gallery 做全球分发">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/26/2021-07-26-AzureImageBuilderCLSIGI/" data-id="clat72drf000pyofk4rty4628" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（二）之自动化构建自定义托管镜像 CentOS 7.7 并集成 Azure Shared Image Gallery 做全球分发">Share</a>
       
 
       
@@ -298,7 +299,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/25/2021-07-25-AzureImageBuilderCLMI/" data-id="claqo3tpg000j28xzbtnk8ugf" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（一）之自动化构建自定义托管镜像 CentOS 7.7">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/07/25/2021-07-25-AzureImageBuilderCLMI/" data-id="clat72drf000nyofke5yffk6u" class="article-share-link" data-share="baidu" data-title="Azure Image Builder（一）之自动化构建自定义托管镜像 CentOS 7.7">Share</a>
       
 
       
@@ -416,7 +417,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/03/17/2021-03-17-AzureDatabricksMonitor/" data-id="claqo3tpf000e28xzf8hj7086" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（四）之通过 Azure Monitor 做集群监控">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2021/03/17/2021-03-17-AzureDatabricksMonitor/" data-id="clat72drf000jyofk2txb4c9n" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（四）之通过 Azure Monitor 做集群监控">Share</a>
       
 
       
@@ -489,7 +490,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="claqo3tpf000h28xz4nklfxgp" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/12/17/2020-12-17-AzureDatabricksSparkSQLonDeltaLake/" data-id="clat72dre000hyofka1mu3jrz" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（三）之 SparkSQL on Delta Lake">Share</a>
       
 
       
@@ -568,7 +569,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="claqo3tpe000a28xz6kl6h1my" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/11/06/2020-11-06-AzureDatabricksStructureStreaming/" data-id="clat72dre000eyofk26fpe0yt" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（二）之流计算 Structure Streaming">Share</a>
       
 
       
@@ -642,7 +643,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="claqo3tpd000928xz087ff0h1" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/04/2020-09-04-AzureDatabricksIntroduction/" data-id="clat72drd000dyofk9oet8e8x" class="article-share-link" data-share="baidu" data-title="Azure Databricks 系列 Blog（一）之开箱">Share</a>
       
 
       
@@ -714,7 +715,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="claqo3tpc000628xz919lgb1e" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/09/03/2020-09-03-GithubCDN/" data-id="clat72drd000ayofk087ib5nc" class="article-share-link" data-share="baidu" data-title="使用 jsDelivr CDN 加速 Github Pages">Share</a>
       
 
       
@@ -813,7 +814,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="claqo3tpt005m28xz29v4fiaa" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/23/2020-01-23-AzureMonitorSNMP/" data-id="clat72drc0009yofkdpwpc4eb" class="article-share-link" data-share="baidu" data-title="Azure Monitor 通过 SNMP 协议监控网络设备 Fortigate Firewall">Share</a>
       
 
       
@@ -911,7 +912,7 @@
     </div>
     <footer class="article-footer">
       
-        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/" data-id="claqo3tpe000d28xzab4a64hj" class="article-share-link" data-share="baidu" data-title="集成 Microsoft Azure Monitor Restful API 来监控 MongoDB">Share</a>
+        <a data-url="https://theodorew.github.io/wxsblog.github.io/2020/01/18/2020-01-18-AzureMonitorRestfulAPI/" data-id="clat72drb0006yofk9l52h96p" class="article-share-link" data-share="baidu" data-title="集成 Microsoft Azure Monitor Restful API 来监控 MongoDB">Share</a>
       
 
       
